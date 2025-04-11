@@ -1,0 +1,40 @@
+/* Set left margin to 4em */
+body {
+  padding-left: 4em;
+  color: white;
+  background-color: black;
+}
+
+.collapsible-section {
+  color: inherit;
+}
+
+.collapsible-section-title.opened::before {
+  content: "\25BC      ";
+}
+
+.collapsible-section-title.closed::before {
+  content: "\25B6     ";
+}
+
+.collapsible-section .collapsible-section-title {
+  color: purple;
+  font-weight: bold;
+  font-size: 24pt;
+}
+
+.collapsible-section .collapsible-section .collapsible-section-title {
+  color: blue;
+  font-weight: bold;
+  font-size: 20pt;
+}
+
+.score100 {
+  color: green;
+}
+.score0 {
+  color: red;
+}
+.scoremiddle {
+  color: orange;
+}

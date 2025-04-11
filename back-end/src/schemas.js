@@ -7,10 +7,13 @@ const userSchema = z.object({
   // Add other user fields as needed
 });
 
-const questionSchema = z.object({
-  text: z.string(),
-  // Add other question fields as needed
-});
+const questionSchema = z
+  .object({
+    text: z.string(),
+    // Add other question fields as needed
+  })
+  .strict();
+// The `.strict()` method ensures that no additional fields are allowed in the object
 
 const quoteSchema = z.object({
   text: z.string(),

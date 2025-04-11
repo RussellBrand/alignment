@@ -1,7 +1,7 @@
 const request = require("supertest");
 const mongoose = require("mongoose");
-const { app, connectDB } = require("../server");
-const { Question } = require("../models");
+const { app, connectDB } = require("../src/server");
+const { Question } = require("../src/models");
 
 // Sample question data
 const testQuestion = {

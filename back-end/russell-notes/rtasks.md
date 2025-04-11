@@ -11,6 +11,7 @@ https://chatgpt.com/share/67f8c673-574c-800e-a62a-20da64e02757
 ## [ ] `delete_all`, `delete_many`, `get_many`, `count`
 
 ## [ ] update should check that the ID's match
-## [ ] 
-## [ ] 
+## [ ] make the real backend object
+
+## [ ] make custom routes
 ## [ ] 

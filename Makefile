@@ -21,3 +21,6 @@ kill3000:
 
 backend:
 	cd back-end/ && npm run dev
+
+test-backend:
+	cd back-end/ && npm run test

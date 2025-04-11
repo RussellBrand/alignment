@@ -5,8 +5,7 @@ const { Question } = require("../models");
 
 // Sample question data
 const testQuestion = {
-  q: "What is the meaning of life?",
-  a: 42,
+  text: "What is the meaning of life?",
 };
 
 describe("Question Routes", () => {
@@ -87,7 +86,7 @@ describe("Question Routes", () => {
         .send(testQuestion);
 
       const questionId = createResponse.body._id;
-      const updatedData = { ...testQuestion, q: "Updated question text" };
+      const updatedData = { ...testQuestion, text: "Updated question text" };
 
       const response = await request(app)
         .put(`/api/questions/${questionId}`)

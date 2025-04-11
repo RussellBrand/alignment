@@ -1,2 +1,16 @@
 ###
 GET http://localhost:3000/api/questions
+
+###
+POST http://localhost:3000/api/questions
+
+{
+  "question": "What is the capital of France?",
+  "options": [
+    "Berlin",
+    "Madrid",
+    "Paris",
+    "Rome"
+  ],
+  "answer": "Paris"
+}

@@ -1,51 +1,26 @@
-// With Vitest globals enabled, we don't need to import these
-// They're automatically available in the global scope
-const superagent = require("superagent");
+const request = require("supertest");
 const mongoose = require("mongoose");
+const { app, connectDB } = require("../server");
 const { Question } = require("../models");
-
-// Import server module
-const { app } = require("../server");
-
-// We'll create our own server instance for testing
-let server;
-
-const BASE_URL = "http://localhost:3000"; // Adjust port as needed
-const API_PREFIX = "/api/questions";
 
 // Sample question data
 const testQuestion = {
-  text: "What is the meaning of life?",
-  options: ["42", "Love", "Growth", "There is no meaning"],
-  correctAnswer: "42",
-  category: "Philosophy",
+  q: "What is the meaning of life?",
+  a: 42,
 };
 
 describe("Question Routes", () => {
-  let createdQuestionId;
+  let db;
 
-  // Set up before all tests
+  // Connect to test database once before all tests
   beforeAll(async () => {
-    // Set NODE_ENV to test
+    // Set NODE_ENV to test to use test database
     process.env.NODE_ENV = "test";
-
-    // Start the server on a test port
-    const PORT = 3000;
-    server = app.listen(PORT);
-
-    // Wait a moment for server to be fully started
-    await new Promise((resolve) => setTimeout(resolve, 500));
-
-    console.log(`Test server started on port ${PORT}`);
+    db = await connectDB();
   });
 
   // Clean up after all tests
   afterAll(async () => {
-    // Close the server and database connection
-    if (server) {
-      await new Promise((resolve) => server.close(resolve));
-      console.log("Test server closed");
-    }
     await mongoose.connection.dropDatabase();
     await mongoose.disconnect();
     console.log("Test database dropped and disconnected");
@@ -58,41 +33,30 @@ describe("Question Routes", () => {
 
   describe("POST /api/questions", () => {
     it("should create a new question", async () => {
-      const response = await superagent
-        .post(`${BASE_URL}${API_PREFIX}`)
+      const response = await request(app)
+        .post("/api/questions")
         .send(testQuestion);
 
       expect(response.status).toBe(201);
       expect(response.body).toHaveProperty("_id");
-      expect(response.body.text).toBe(testQuestion.text);
-
-      // Save the ID for other tests
-      createdQuestionId = response.body._id;
+      expect(response.body.q).toBe(testQuestion.q);
     });
 
     it("should return 400 with invalid data", async () => {
-      try {
-        await superagent
-          .post(`${BASE_URL}${API_PREFIX}`)
-          .send({ text: "Incomplete question" });
-        // If we reach here, test should fail
-        expect(true).toBe(false);
-      } catch (error) {
-        // SuperAgent error response is in error.response.status
-        console.log(error);
-        expect(error.response.status).toBe(400);
-      }
+      const response = await request(app)
+        .post("/api/questions")
+        .send({ invalidField: "Incomplete question" });
+
+      expect(response.status).toBe(400);
     });
   });
 
   describe("GET /api/questions", () => {
     it("should return all questions", async () => {
       // First create a question
-      const createResponse = await superagent
-        .post(`${BASE_URL}${API_PREFIX}`)
-        .send(testQuestion);
+      await request(app).post("/api/questions").send(testQuestion);
 
-      const response = await superagent.get(`${BASE_URL}${API_PREFIX}`);
+      const response = await request(app).get("/api/questions");
 
       expect(response.status).toBe(200);
       expect(Array.isArray(response.body)).toBe(true);
@@ -101,63 +65,58 @@ describe("Question Routes", () => {
 
     it("should return a specific question by ID", async () => {
       // First create a question
-      const createResponse = await superagent
-        .post(`${BASE_URL}${API_PREFIX}`)
+      const createResponse = await request(app)
+        .post("/api/questions")
         .send(testQuestion);
 
       const questionId = createResponse.body._id;
 
-      const response = await superagent.get(
-        `${BASE_URL}${API_PREFIX}/${questionId}`
-      );
+      const response = await request(app).get(`/api/questions/${questionId}`);
 
       expect(response.status).toBe(200);
       expect(response.body._id).toBe(questionId);
-      expect(response.body.text).toBe(testQuestion.text);
+      expect(response.body.q).toBe(testQuestion.q);
     });
   });
 
   describe("PUT /api/questions/:id", () => {
     it("should update an existing question", async () => {
       // First create a question
-      const createResponse = await superagent
-        .post(`${BASE_URL}${API_PREFIX}`)
+      const createResponse = await request(app)
+        .post("/api/questions")
         .send(testQuestion);
 
       const questionId = createResponse.body._id;
-      const updatedData = { ...testQuestion, text: "Updated question text" };
+      const updatedData = { ...testQuestion, q: "Updated question text" };
 
-      const response = await superagent
-        .put(`${BASE_URL}${API_PREFIX}/${questionId}`)
+      const response = await request(app)
+        .put(`/api/questions/${questionId}`)
         .send(updatedData);
 
       expect(response.status).toBe(200);
-      expect(response.body.text).toBe(updatedData.text);
+      expect(response.body.q).toBe(updatedData.q);
     });
   });
 
   describe("DELETE /api/questions/:id", () => {
     it("should delete an existing question", async () => {
       // First create a question
-      const createResponse = await superagent
-        .post(`${BASE_URL}${API_PREFIX}`)
+      const createResponse = await request(app)
+        .post("/api/questions")
         .send(testQuestion);
 
       const questionId = createResponse.body._id;
 
-      const deleteResponse = await superagent.delete(
-        `${BASE_URL}${API_PREFIX}/${questionId}`
+      const deleteResponse = await request(app).delete(
+        `/api/questions/${questionId}`
       );
       expect(deleteResponse.status).toBe(200);
 
-      // Try to get the deleted question - should fail
-      try {
-        await superagent.get(`${BASE_URL}${API_PREFIX}/${questionId}`);
-        // If we reach here, test should fail
-        expect(true).toBe(false);
-      } catch (error) {
-        expect(error.status).toBe(404);
-      }
+      // Try to get the deleted question - should return 404
+      const getResponse = await request(app).get(
+        `/api/questions/${questionId}`
+      );
+      expect(getResponse.status).toBe(404);
     });
   });
 });

@@ -13,6 +13,9 @@ deno-view:
 deno-deploy: 
 	deployctl deploy --project=alignment  --save-config main.ts
 
+deploy-dry-run:
+	deployctl deploy --project=alignment --dry-run  main.ts
+
 build:
 	cd front-end && npm run build
 

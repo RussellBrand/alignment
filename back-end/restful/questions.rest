@@ -2,15 +2,15 @@
 GET http://localhost:3000/api/questions
 
 ###
+GET http://localhost:3000/api/questions/67f8b51221a8087f90d80a84
+
+
+
+### 
+
 POST http://localhost:3000/api/questions
+Content-Type: application/json
 
 {
-  "question": "What is the capital of France?",
-  "options": [
-    "Berlin",
-    "Madrid",
-    "Paris",
-    "Rome"
-  ],
-  "answer": "Paris"
+    "text": "What is the meaning of life?"
 }

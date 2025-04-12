@@ -14,4 +14,5 @@ https://chatgpt.com/share/67f8c673-574c-800e-a62a-20da64e02757
 ## [ ] make the real backend object
 
 ## [ ] make custom routes
-## [ ] 
+## [ ] upload questions 
+## [ ] upload answer types

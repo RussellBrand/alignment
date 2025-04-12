@@ -1,7 +1,7 @@
-const request = require("supertest");
-const mongoose = require("mongoose");
-const { app, connectDB } = require("../src/server");
-const { Question } = require("../src/models");
+import request from "supertest";
+import mongoose from "mongoose";
+import { app, connectDB } from "../src/server";
+import { Question } from "../src/models";
 
 // Sample question data
 const testQuestion = {
@@ -9,11 +9,10 @@ const testQuestion = {
 };
 
 describe("Question Routes", () => {
-  let db;
+  let db: mongoose.Connection;
 
   // Connect to test database once before all tests
   beforeAll(async () => {
-    // Set NODE_ENV to test to use test database
     process.env.NODE_ENV = "test";
     db = await connectDB();
   });
@@ -38,7 +37,7 @@ describe("Question Routes", () => {
 
       expect(response.status).toBe(201);
       expect(response.body).toHaveProperty("_id");
-      expect(response.body.q).toBe(testQuestion.q);
+      expect(response.body.text).toBe(testQuestion.text);
     });
 
     it("should return 400 with invalid data", async () => {
@@ -52,7 +51,6 @@ describe("Question Routes", () => {
 
   describe("GET /api/questions", () => {
     it("should return all questions", async () => {
-      // First create a question
       await request(app).post("/api/questions").send(testQuestion);
 
       const response = await request(app).get("/api/questions");
@@ -63,7 +61,6 @@ describe("Question Routes", () => {
     });
 
     it("should return a specific question by ID", async () => {
-      // First create a question
       const createResponse = await request(app)
         .post("/api/questions")
         .send(testQuestion);
@@ -74,13 +71,12 @@ describe("Question Routes", () => {
 
       expect(response.status).toBe(200);
       expect(response.body._id).toBe(questionId);
-      expect(response.body.q).toBe(testQuestion.q);
+      expect(response.body.text).toBe(testQuestion.text);
     });
   });
 
   describe("PUT /api/questions/:id", () => {
     it("should update an existing question", async () => {
-      // First create a question
       const createResponse = await request(app)
         .post("/api/questions")
         .send(testQuestion);
@@ -93,13 +89,12 @@ describe("Question Routes", () => {
         .send(updatedData);
 
       expect(response.status).toBe(200);
-      expect(response.body.q).toBe(updatedData.q);
+      expect(response.body.text).toBe(updatedData.text);
     });
   });
 
   describe("DELETE /api/questions/:id", () => {
     it("should delete an existing question", async () => {
-      // First create a question
       const createResponse = await request(app)
         .post("/api/questions")
         .send(testQuestion);
@@ -111,7 +106,6 @@ describe("Question Routes", () => {
       );
       expect(deleteResponse.status).toBe(200);
 
-      // Try to get the deleted question - should return 404
       const getResponse = await request(app).get(
         `/api/questions/${questionId}`
       );

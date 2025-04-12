@@ -1,9 +1,13 @@
-const express = require("express");
-const controller = require("../controllers/crudController");
-const validate = require("../middlewares/validate");
-const schemas = require("../schemas");
+import express, { Router } from "express";
+import controller from "../controllers/crudController";
+import validate from "../middlewares/validate";
+import { ZodSchema } from "zod";
+import { Model } from "mongoose";
 
-module.exports = (Model, schema) => {
+export default function createRoutes(
+  Model: Model<any>,
+  schema: ZodSchema
+): Router {
   const router = express.Router();
 
   router.post("/", validate(schema), controller.create(Model));
@@ -13,4 +17,4 @@ module.exports = (Model, schema) => {
   router.delete("/:id", controller.delete(Model));
 
   return router;
-};
+}

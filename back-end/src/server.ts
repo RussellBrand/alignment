@@ -1,6 +1,15 @@
 import express, { Application } from "express";
 import mongoose, { Connection } from "mongoose";
-import { User, Question, Quote, Whence } from "./models";
+import {
+  User,
+  Question,
+  Quote,
+  Whence,
+  IUser,
+  IQuestion,
+  IQuote,
+  IWhence,
+} from "./models";
 import createRoutes from "./routes/crudRoutes";
 import {
   userSchema,
@@ -12,10 +21,10 @@ import {
 const app: Application = express();
 app.use(express.json());
 
-app.use("/api/users", createRoutes(User, userSchema));
-app.use("/api/questions", createRoutes(Question, questionSchema));
-app.use("/api/quotes", createRoutes(Quote, quoteSchema));
-app.use("/api/whence", createRoutes(Whence, whenceSchema));
+app.use("/api/users", createRoutes<IUser>(User, userSchema));
+app.use("/api/questions", createRoutes<IQuestion>(Question, questionSchema));
+app.use("/api/quotes", createRoutes<IQuote>(Quote, quoteSchema));
+app.use("/api/whence", createRoutes<IWhence>(Whence, whenceSchema));
 
 const connectDB = async (): Promise<Connection> => {
   const mongoURI =

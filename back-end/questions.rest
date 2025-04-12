@@ -6,7 +6,8 @@ PUT http://localhost:3000/api/questions/67f8b51221a8087f90d80a84
 Content-Type: application/json
 
 {
-    "_id": "67f8b51221a8087f90d80a84"
+    "_id": "67f8b51221a8087f90d80a84",
+    "text": "udated....."
     
 }
 

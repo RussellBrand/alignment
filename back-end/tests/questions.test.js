@@ -9,7 +9,7 @@ const testQuestion = {
 };
 
 describe("Question Routes", () => {
-  let db: mongoose.Connection;
+  let db; //: mongoose.Connection
 
   // Connect to test database once before all tests
   beforeAll(async () => {

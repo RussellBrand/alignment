@@ -1,21 +1,24 @@
 import { z } from "zod";
-import createModel from "@zodyac/zod-mongoose"; // Fixed import syntax
-import { Document, model, Schema } from "mongoose";
+import { extendZod, zodSchema } from "@zodyac/zod-mongoose";
+import mongoose from "mongoose";
 
-// Define the schema once with Zod
+// Extend Zod with zodyac methods
+extendZod(z);
+
+// Define the Zod schema for validation and type inference
 export const quoteSchema = z.object({
   text: z.string(),
   author: z.string(),
 });
 
-// Export the type derived from the Zod schema
-export type IQuote = z.infer<typeof quoteSchema> & Document;
+// Extract the TypeScript type from the Zod schema
+export type QuoteType = z.infer<typeof quoteSchema>;
 
-// Convert Zod schema to Mongoose schema
-const QuoteMongooseSchema = new Schema({
-  text: { type: String, required: true },
-  author: { type: String, required: true },
-});
+// Define the interface that extends mongoose.Document
+export interface IQuote extends QuoteType, mongoose.Document {}
 
-// Create and export the Mongoose model
-export const Quote = model<IQuote>("Quote", QuoteMongooseSchema);
+// Create the mongoose schema using zodSchema from the Zod schema
+const mongooseSchema = zodSchema(quoteSchema);
+
+// Create and export the model with a type assertion to overcome the type compatibility issue
+export const Quote = mongoose.model<IQuote>("Quote", mongooseSchema as any);

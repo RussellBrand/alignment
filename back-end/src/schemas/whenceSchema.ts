@@ -1,19 +1,23 @@
 import { z } from "zod";
-import createModel from "@zodyac/zod-mongoose"; // Fixed import syntax
-import { Document, model, Schema } from "mongoose";
+import { extendZod, zodSchema } from "@zodyac/zod-mongoose";
+import mongoose from "mongoose";
+
+// Extend Zod with zodyac methods
+extendZod(z);
 
 // Define the schema once with Zod
 export const whenceSchema = z.object({
   source: z.string(),
 });
 
-// Export the type derived from the Zod schema
-export type IWhence = z.infer<typeof whenceSchema> & Document;
+// Extract the TypeScript type from the Zod schema
+export type WhenceType = z.infer<typeof whenceSchema>;
 
-// Convert Zod schema to Mongoose schema
-const WhenceMongooseSchema = new Schema({
-  source: { type: String, required: true },
-});
+// Define the interface that extends mongoose.Document
+export interface IWhence extends WhenceType, mongoose.Document {}
 
-// Create and export the Mongoose model
-export const Whence = model<IWhence>("Whence", WhenceMongooseSchema);
+// Create the mongoose schema using zodSchema from the Zod schema
+const mongooseSchema = zodSchema(whenceSchema);
+
+// Create and export the model with a type assertion to overcome the type compatibility issue
+export const Whence = mongoose.model<IWhence>("Whence", mongooseSchema as any);

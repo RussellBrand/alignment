@@ -1,6 +1,9 @@
 import { z } from "zod";
-import createModel from "@zodyac/zod-mongoose"; // Fixed import syntax
-import { Document, model, Schema } from "mongoose";
+import { extendZod, zodSchema } from "@zodyac/zod-mongoose";
+import mongoose from "mongoose";
+
+// Extend Zod with zodyac methods
+extendZod(z);
 
 // Define the schema once with Zod
 export const userSchema = z.object({
@@ -8,14 +11,14 @@ export const userSchema = z.object({
   email: z.string().email(),
 });
 
-// Export the type derived from the Zod schema
-export type IUser = z.infer<typeof userSchema> & Document;
+// Extract the TypeScript type from the Zod schema
+export type UserType = z.infer<typeof userSchema>;
 
-// Convert Zod schema to Mongoose schema
-const UserMongooseSchema = new Schema({
-  name: { type: String, required: true },
-  email: { type: String, required: true },
-});
+// Define the interface that extends mongoose.Document
+export interface IUser extends UserType, mongoose.Document {}
 
-// Create and export the Mongoose model
-export const User = model<IUser>("User", UserMongooseSchema);
+// Create the mongoose schema using zodSchema from the Zod schema
+const mongooseSchema = zodSchema(userSchema);
+
+// Create and export the model with a type assertion to overcome the type compatibility issue
+export const User = mongoose.model<IUser>("User", mongooseSchema as any);

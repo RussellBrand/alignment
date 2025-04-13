@@ -1,7 +1,7 @@
 import request from "supertest";
 import mongoose from "mongoose";
 import { app, connectDB } from "../src/server";
-import { Question } from "../src/schemas/questionSchema"; // Import directly from questionSchema
+import { Question } from "../src/schemas/questionSchema";
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 
 // Sample question data

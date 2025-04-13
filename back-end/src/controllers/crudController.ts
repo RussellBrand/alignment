@@ -43,6 +43,32 @@ const readOne =
     }
   };
 
+// Generic function to read multiple documents by ids
+const readMany =
+  <T extends Document>(Model: Model<T>) =>
+  async (req: Request, res: Response) => {
+    try {
+      // Expect an array of ids in the request body
+      const { ids } = req.body;
+
+      if (!ids || !Array.isArray(ids)) {
+        return res.status(400).json({ error: "Array of IDs is required" });
+      }
+
+      const documents = await Model.find({ _id: { $in: ids } });
+
+      // Check if any documents were found
+      if (documents.length === 0) {
+        return res.status(404).json({ error: "No documents found" });
+      }
+
+      res.status(200).json(documents);
+    } catch (error: unknown) {
+      const err = error as Error;
+      res.status(500).json({ error: err.message });
+    }
+  };
+
 // Generic function to update one document
 const update =
   <T extends Document>(Model: Model<T>) =>
@@ -55,6 +81,35 @@ const update =
         return res.status(404).json({ error: "Not found" });
       }
       res.status(200).json(document);
+    } catch (error: unknown) {
+      const err = error as Error;
+      res.status(400).json({ error: err.message });
+    }
+  };
+
+// Generic function for partial update (PATCH) of a document
+//
+// TODO: validation that there are no excess fields
+// TODO: do it in one mongo call instead of two
+const patch =
+  <T extends Document>(Model: Model<T>) =>
+  async (req: Request, res: Response) => {
+    try {
+      // Use findById first to check if document exists
+      const existingDocument = await Model.findById(req.params.id);
+      if (!existingDocument) {
+        return res.status(404).json({ error: "Not found" });
+      }
+
+      // Apply only the fields that are provided in the request body
+      Object.keys(req.body).forEach((key) => {
+        existingDocument.set(key, req.body[key]);
+      });
+
+      // Save the updated document
+      await existingDocument.save();
+
+      res.status(200).json(existingDocument);
     } catch (error: unknown) {
       const err = error as Error;
       res.status(400).json({ error: err.message });
@@ -77,4 +132,12 @@ const deleteOne =
     }
   };
 
-export default { create, readAll, readOne, update, delete: deleteOne };
+export default {
+  create,
+  readAll,
+  readOne,
+  readMany,
+  update,
+  patch,
+  delete: deleteOne,
+};

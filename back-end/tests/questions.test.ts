@@ -4,6 +4,11 @@ import { app, connectDB } from "../src/server";
 import { Question } from "../src/schemas/questionSchema";
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 
+// TODO: factor this out
+const path = require("path");
+const fileName = path.basename(__filename);
+const testDBname = "_" + fileName.replace(/\./g, "_");
+
 // Sample question data
 const testQuestion = {
   text: "What is the meaning of life?",
@@ -15,7 +20,7 @@ describe("Question Routes", () => {
   // Connect to test database once before all tests
   beforeAll(async () => {
     process.env.NODE_ENV = "test";
-    db = await connectDB("_questions");
+    db = await connectDB(testDBname);
   });
 
   // Clean up after all tests

@@ -7,6 +7,11 @@ import { Quote } from "../src/schemas/quoteSchema";
 import { Whence } from "../src/schemas/whenceSchema";
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 
+// TODO favot this out
+const path = require("path");
+const fileName = path.basename(__filename);
+const testDBname = "_" + fileName.replace(/\./g, "_");
+
 describe("Simple HTML Routes", () => {
   let db: mongoose.Connection;
   let questionId: string;
@@ -14,20 +19,20 @@ describe("Simple HTML Routes", () => {
   let quoteId: string;
   let whenceId: string;
 
-  // Connect to test database once before all tests
+  // TODO: favor this out
   beforeAll(async () => {
     process.env.NODE_ENV = "test";
-    db = await connectDB("simple_test");
+    db = await connectDB(testDBname);
   });
 
-  // Clean up after all tests
+  // TODO: favor this out
   afterAll(async () => {
     await mongoose.connection.dropDatabase();
     await mongoose.disconnect();
     // console.log("Test database dropped and disconnected");
   });
 
-  // Clear test data and add some test documents before each test
+  // TODO: favor this out
   beforeEach(async () => {
     // Clean all collections
     await Question.deleteMany({});

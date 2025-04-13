@@ -1,16 +1,20 @@
 import request from "supertest";
 import mongoose from "mongoose";
-import { app, connectDB } from "../src/server";
+import { app } from "../src/server";
 import { Question } from "../src/schemas/questionSchema";
 import { User } from "../src/schemas/userSchema";
 import { Quote } from "../src/schemas/quoteSchema";
 import { Whence } from "../src/schemas/whenceSchema";
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
+import {
+  computeDBname,
+  setupTestDB,
+  teardownTestDB,
+  createTestData,
+  TestIDs,
+} from "./test_utils";
 
-// TODO favot this out
-const path = require("path");
-const fileName = path.basename(__filename);
-const testDBname = "_" + fileName.replace(/\./g, "_");
+const testDBname = computeDBname(__filename);
 
 describe("Simple HTML Routes", () => {
   let db: mongoose.Connection;
@@ -19,47 +23,17 @@ describe("Simple HTML Routes", () => {
   let quoteId: string;
   let whenceId: string;
 
-  // TODO: favor this out
   beforeAll(async () => {
-    process.env.NODE_ENV = "test";
-    db = await connectDB(testDBname);
+    db = await setupTestDB(testDBname);
   });
 
-  // TODO: favor this out
   afterAll(async () => {
-    await mongoose.connection.dropDatabase();
-    await mongoose.disconnect();
-    // console.log("Test database dropped and disconnected");
+    await teardownTestDB();
   });
 
-  // TODO: favor this out
   beforeEach(async () => {
-    // Clean all collections
-    await Question.deleteMany({});
-    await User.deleteMany({});
-    await Quote.deleteMany({});
-    await Whence.deleteMany({});
-
-    // Create test data for each model
-    const question = await Question.create({
-      text: "What is a test question?",
-    });
-    questionId = question._id.toString();
-
-    const user = await User.create({
-      name: "Test User",
-      email: "test@example.com",
-    });
-    userId = user._id.toString();
-
-    const quote = await Quote.create({
-      text: "This is a test quote",
-      author: "Test Author",
-    });
-    quoteId = quote._id.toString();
-
-    const whence = await Whence.create({ source: "Test Source" });
-    whenceId = whence._id.toString();
+    const ids: TestIDs = await createTestData();
+    ({ questionId, userId, quoteId, whenceId } = ids);
   });
 
   describe("Dashboard", () => {

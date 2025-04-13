@@ -1,13 +1,11 @@
 import request from "supertest";
 import mongoose from "mongoose";
-import { app, connectDB } from "../src/server";
+import { app } from "../src/server";
 import { Question } from "../src/schemas/questionSchema";
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
+import { computeDBname, setupTestDB, teardownTestDB } from "./test_utils";
 
-// TODO: factor this out
-const path = require("path");
-const fileName = path.basename(__filename);
-const testDBname = "_" + fileName.replace(/\./g, "_");
+const testDBname = computeDBname(__filename);
 
 // Sample question data
 const testQuestion = {
@@ -19,15 +17,12 @@ describe("Question Routes", () => {
 
   // Connect to test database once before all tests
   beforeAll(async () => {
-    process.env.NODE_ENV = "test";
-    db = await connectDB(testDBname);
+    db = await setupTestDB(testDBname);
   });
 
   // Clean up after all tests
   afterAll(async () => {
-    await mongoose.connection.dropDatabase();
-    await mongoose.disconnect();
-    // console.log("Test database dropped and disconnected");
+    await teardownTestDB();
   });
 
   // Clear test data before each test

@@ -2,26 +2,15 @@ import express, { Application } from "express";
 import mongoose, { Connection } from "mongoose";
 import createRoutes from "./routes/crudRoutes";
 
-// Import everything from the centralized schemas index
+// Import directly from individual schema files
+import { userSchema, User, type IUser } from "./schemas/userSchema";
 import {
-  // Schemas
-  userSchema,
   questionSchema,
-  quoteSchema,
-  whenceSchema,
-
-  // Models
-  User,
   Question,
-  Quote,
-  Whence,
-
-  // Types
-  IUser,
-  IQuestion,
-  IQuote,
-  IWhence,
-} from "./schemas";
+  type IQuestion,
+} from "./schemas/questionSchema";
+import { quoteSchema, Quote, type IQuote } from "./schemas/quoteSchema";
+import { whenceSchema, Whence, type IWhence } from "./schemas/whenceSchema";
 
 const app: Application = express();
 app.use(express.json());

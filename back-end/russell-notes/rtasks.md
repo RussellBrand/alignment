@@ -85,3 +85,9 @@ calls deleteOne
 ## [ ] real table definitions
 ## [ ] sit for test
 ## [ ] user password
+
+
+## [ ] hash of full pathname
+## [ ] 
+## [ ] 
+## [ ] 

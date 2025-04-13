@@ -27,3 +27,12 @@ backend:
 
 test-backend:
 	cd back-end/ && npm run test
+
+test-api:
+	cd back-end/ && npm run test -- api_questions
+
+test-ro:
+	cd back-end/ && npm run test -- simple_ro_questions
+
+test-simply:
+	cd back-end/ && npm run test -- simple_modify_questions

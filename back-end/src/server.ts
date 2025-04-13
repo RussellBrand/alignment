@@ -23,11 +23,11 @@ app.use("/api/questions", createRoutes<IQuestion>(Question, questionSchema));
 app.use("/api/quotes", createRoutes<IQuote>(Quote, quoteSchema));
 app.use("/api/whence", createRoutes<IWhence>(Whence, whenceSchema));
 
-// Simple HTML routes
-app.use("/simple/users", createSimpleRoutes(User));
-app.use("/simple/questions", createSimpleRoutes(Question));
-app.use("/simple/quotes", createSimpleRoutes(Quote));
-app.use("/simple/whence", createSimpleRoutes(Whence));
+// Simple HTML routes - now passing schemas directly
+app.use("/simple/users", createSimpleRoutes(User, userSchema));
+app.use("/simple/questions", createSimpleRoutes(Question, questionSchema));
+app.use("/simple/quotes", createSimpleRoutes(Quote, quoteSchema));
+app.use("/simple/whence", createSimpleRoutes(Whence, whenceSchema));
 
 // Dashboard route
 app.get(
@@ -48,10 +48,9 @@ const connectDB = async (dbSuffix?: string): Promise<Connection> => {
       : process.env.MONGODB_URI || "mongodb://localhost:27017/zod2mongo";
 
   // Append the suffix to the database name if provided
-  let mongoURI = baseMongoURI;
-  if (dbSuffix) {
-    mongoURI += dbSuffix;
-  }
+  const mongoURI = dbSuffix
+    ? baseMongoURI.replace(/\/([^\/]+)$/, `/$1${dbSuffix}`)
+    : baseMongoURI;
 
   try {
     await mongoose.connect(mongoURI);

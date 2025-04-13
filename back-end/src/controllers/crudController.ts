@@ -116,10 +116,14 @@ const update =
     try {
       const document = await Model.findByIdAndUpdate(req.params.id, req.body, {
         new: true,
+        runValidators: true,
+        upsert: false, // Don't create if it doesn't exist
       });
+
       if (!document) {
         return res.status(404).json({ error: "Not found" });
       }
+
       res.status(200).json(document);
     } catch (error: unknown) {
       const err = error as Error;
@@ -128,28 +132,22 @@ const update =
   };
 
 // Generic function for partial update (PATCH) of a document
-//
-// TODO: validation that there are no excess fields
-// TODO: do it in one mongo call instead of two
 const patch =
   <T extends Document>(Model: Model<T>) =>
   async (req: Request, res: Response) => {
     try {
-      // Use findById first to check if document exists
-      const existingDocument = await Model.findById(req.params.id);
-      if (!existingDocument) {
+      // Skip validation on the overall document and directly apply the update
+      const document = await Model.findByIdAndUpdate(
+        req.params.id,
+        { $set: req.body },
+        { new: true, runValidators: true }
+      );
+
+      if (!document) {
         return res.status(404).json({ error: "Not found" });
       }
 
-      // Apply only the fields that are provided in the request body
-      Object.keys(req.body).forEach((key) => {
-        existingDocument.set(key, req.body[key]);
-      });
-
-      // Save the updated document
-      await existingDocument.save();
-
-      res.status(200).json(existingDocument);
+      res.status(200).json(document);
     } catch (error: unknown) {
       const err = error as Error;
       res.status(400).json({ error: err.message });

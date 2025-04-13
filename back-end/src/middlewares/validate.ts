@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from "express";
-import { ZodSchema, ZodError, z } from "zod";
+import { ZodSchema, ZodError, z, ZodObject, ZodRawShape } from "zod";
 
 const validate =
   (schema: ZodSchema) => (req: Request, res: Response, next: NextFunction) => {
@@ -45,8 +45,20 @@ const validatePatchRequest =
       const { _id, ...bodyWithoutId } = req.body;
 
       // For PATCH requests, we need to validate partial data
-      // Create a partial schema where all properties are optional
-      const partialSchema = schema.partial();
+      // Use z.object({}).passthrough() as a fallback if the schema isn't an object schema
+      let partialSchema: ZodSchema;
+
+      if (schema instanceof ZodObject) {
+        // If it's a ZodObject, we can safely call .partial()
+        partialSchema = schema.partial();
+      } else {
+        // For non-object schemas, we'll need a different approach
+        // This is a simple passthrough that will accept any data
+        console.warn(
+          "Warning: Non-object schema used with validatePatchRequest"
+        );
+        partialSchema = z.any();
+      }
 
       // Validate the partial data
       partialSchema.parse(bodyWithoutId);

@@ -1,6 +1,8 @@
 import express, { Application } from "express";
 import mongoose, { Connection } from "mongoose";
 import createRoutes from "./routes/crudRoutes";
+import createSimpleRoutes from "./routes/simpleRoutes";
+import simpleController from "./controllers/simpleController";
 
 // Import directly from individual schema files
 import { userSchema, User, type IUser } from "./schemas/userSchema";
@@ -15,10 +17,28 @@ import { whenceSchema, Whence, type IWhence } from "./schemas/whenceSchema";
 const app: Application = express();
 app.use(express.json());
 
+// Regular API routes
 app.use("/api/users", createRoutes<IUser>(User, userSchema));
 app.use("/api/questions", createRoutes<IQuestion>(Question, questionSchema));
 app.use("/api/quotes", createRoutes<IQuote>(Quote, quoteSchema));
 app.use("/api/whence", createRoutes<IWhence>(Whence, whenceSchema));
+
+// Simple HTML routes
+app.use("/simple/users", createSimpleRoutes(User));
+app.use("/simple/questions", createSimpleRoutes(Question));
+app.use("/simple/quotes", createSimpleRoutes(Quote));
+app.use("/simple/whence", createSimpleRoutes(Whence));
+
+// Dashboard route
+app.get(
+  "/simple",
+  simpleController.dashboard(["Users", "Questions", "Quotes", "Whence"])
+);
+
+// Redirect root to simple dashboard
+app.get("/", (_req, res) => {
+  res.redirect("/simple");
+});
 
 const connectDB = async (): Promise<Connection> => {
   const mongoURI =

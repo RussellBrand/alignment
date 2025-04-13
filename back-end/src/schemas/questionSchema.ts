@@ -22,4 +22,7 @@ export interface IQuestion extends QuestionType, mongoose.Document {}
 const mongooseSchema = zodSchema(questionSchema);
 
 // Create and export the model with a type assertion to overcome the type compatibility issue
-export const Question = mongoose.model<IQuestion>("Question", mongooseSchema as any);
+export const Question = mongoose.model<IQuestion>(
+  "Question",
+  mongooseSchema as any
+);

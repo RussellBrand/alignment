@@ -199,4 +199,93 @@ describe("Question Routes", () => {
       expect(getResponse.status).toBe(404);
     });
   });
+
+  describe("PATCH /api/questions/:id", () => {
+    it("should partially update an existing question", async () => {
+      // First create a question
+      const createResponse = await request(app)
+        .post("/api/questions")
+        .send(testQuestion);
+
+      const questionId = createResponse.body._id;
+      const updatedData = { text: "Partially updated question text" };
+
+      // Perform a partial update
+      const response = await request(app)
+        .patch(`/api/questions/${questionId}`)
+        .send(updatedData);
+
+      expect(response.status).toBe(200);
+      expect(response.body.text).toBe(updatedData.text);
+    });
+
+    it("should reject patch if the ID in the payload doesn't match the URL parameter", async () => {
+      // First create two questions
+      const createResponse = await request(app)
+        .post("/api/questions")
+        .send(testQuestion);
+
+      const anotherResponse = await request(app)
+        .post("/api/questions")
+        .send({ text: "Another question" });
+
+      const questionId = createResponse.body._id;
+      const anotherQuestionId = anotherResponse.body._id;
+
+      // Try to patch with mismatched IDs
+      const patchData = {
+        _id: anotherQuestionId, // Deliberately using a different ID
+        text: "This patch should fail",
+      };
+
+      const response = await request(app)
+        .patch(`/api/questions/${questionId}`)
+        .send(patchData);
+
+      // Should be rejected with 400 status
+      expect(response.status).toBe(400);
+      // Should include an error message about ID mismatch
+      expect(response.body).toHaveProperty("error");
+      expect(response.body.error[0].message).toContain(
+        "Body _id must match URL parameter id"
+      );
+    });
+
+    it("should reject patch with excess attributes not in the schema", async () => {
+      const createResponse = await request(app)
+        .post("/api/questions")
+        .send(testQuestion);
+
+      const questionId = createResponse.body._id;
+      const patchWithExcessAttributes = {
+        text: "Valid question text update",
+        excessAttribute: "This attribute should be rejected",
+      };
+
+      const response = await request(app)
+        .patch(`/api/questions/${questionId}`)
+        .send(patchWithExcessAttributes);
+
+      // The request should be rejected with 400 status
+      expect(response.status).toBe(400);
+    });
+
+    it("should reject patch with incorrect field type", async () => {
+      const createResponse = await request(app)
+        .post("/api/questions")
+        .send(testQuestion);
+
+      const questionId = createResponse.body._id;
+      const patchWithWrongType = {
+        text: 12345, // Text should be a string, not a number
+      };
+
+      const response = await request(app)
+        .patch(`/api/questions/${questionId}`)
+        .send(patchWithWrongType);
+
+      // The request should be rejected with 400 status
+      expect(response.status).toBe(400);
+    });
+  });
 });

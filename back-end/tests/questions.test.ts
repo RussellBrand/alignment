@@ -106,6 +106,78 @@ describe("Question Routes", () => {
       expect(response.status).toBe(200);
       expect(response.body.text).toBe(updatedData.text);
     });
+
+    it("should update a question if the ID is not included in the payload", async () => {
+      // First create a question
+      const createResponse = await request(app)
+        .post("/api/questions")
+        .send(testQuestion);
+
+      const questionId = createResponse.body._id;
+      const updatedData = { text: "Updated without including ID" };
+
+      // Update without including the _id in the payload
+      const response = await request(app)
+        .put(`/api/questions/${questionId}`)
+        .send(updatedData);
+
+      expect(response.status).toBe(200);
+      expect(response.body.text).toBe(updatedData.text);
+    });
+
+    it("should update a question if the ID in the payload matches the URL parameter", async () => {
+      // First create a question
+      const createResponse = await request(app)
+        .post("/api/questions")
+        .send(testQuestion);
+
+      const questionId = createResponse.body._id;
+      const updatedData = {
+        _id: questionId,
+        text: "Updated with matching ID",
+      };
+
+      // Update with matching IDs
+      const response = await request(app)
+        .put(`/api/questions/${questionId}`)
+        .send(updatedData);
+
+      expect(response.status).toBe(200);
+      expect(response.body.text).toBe(updatedData.text);
+    });
+
+    it("should reject update if the ID in the payload doesn't match the URL parameter", async () => {
+      // First create a question
+      const createResponse = await request(app)
+        .post("/api/questions")
+        .send(testQuestion);
+
+      // Create another question to get a different ID
+      const anotherResponse = await request(app)
+        .post("/api/questions")
+        .send({ text: "Another question" });
+
+      const questionId = createResponse.body._id;
+      const anotherQuestionId = anotherResponse.body._id;
+
+      // Try to update with mismatched IDs
+      const updatedData = {
+        _id: anotherQuestionId, // Deliberately using a different ID
+        text: "This update should fail",
+      };
+
+      const response = await request(app)
+        .put(`/api/questions/${questionId}`)
+        .send(updatedData);
+
+      // Should be rejected with 400 status
+      expect(response.status).toBe(400);
+      // Should include an error message about ID mismatch
+      expect(response.body).toHaveProperty("error");
+      expect(response.body.error[0].message).toContain(
+        "Body _id must match URL parameter id"
+      );
+    });
   });
 
   describe("DELETE /api/questions/:id", () => {

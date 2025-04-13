@@ -1,4 +1,5 @@
-
+## [ ] strict
+put strict on all the data definitions
 
 
 ## [Y] .env for deploy

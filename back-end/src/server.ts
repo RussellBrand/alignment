@@ -1,21 +1,26 @@
 import express, { Application } from "express";
 import mongoose, { Connection } from "mongoose";
-import {
-  User,
-  Question,
-  Quote,
-  Whence,
-  IUser,
-  IQuestion,
-  IQuote,
-  IWhence,
-} from "./models";
 import createRoutes from "./routes/crudRoutes";
+
+// Import everything from the centralized schemas index
 import {
+  // Schemas
   userSchema,
   questionSchema,
   quoteSchema,
   whenceSchema,
+
+  // Models
+  User,
+  Question,
+  Quote,
+  Whence,
+
+  // Types
+  IUser,
+  IQuestion,
+  IQuote,
+  IWhence,
 } from "./schemas";
 
 const app: Application = express();

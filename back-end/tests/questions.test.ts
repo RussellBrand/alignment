@@ -1,7 +1,7 @@
 import request from "supertest";
 import mongoose from "mongoose";
 import { app, connectDB } from "../src/server";
-import { Question } from "../src/models";
+import { Question } from "../src/schemas"; // Import from centralized schema index
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 
 // Sample question data
@@ -39,6 +39,20 @@ describe("Question Routes", () => {
       expect(response.status).toBe(201);
       expect(response.body).toHaveProperty("_id");
       expect(response.body.text).toBe(testQuestion.text);
+    });
+
+    it("should reject question with excess attributes", async () => {
+      const questionWithExcessAttributes = {
+        text: "Valid question text",
+        excessAttribute: "This attribute should be stripped or rejected",
+      };
+
+      const response = await request(app)
+        .post("/api/questions")
+        .send(questionWithExcessAttributes);
+
+      // The request should be rejected with 400 status
+      expect(response.status).toBe(400);
     });
 
     it("should return 400 with invalid data", async () => {

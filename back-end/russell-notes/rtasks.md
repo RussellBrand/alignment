@@ -78,3 +78,10 @@ calls deleteOne
 give the user a button
 require confirmation
 calls deleteOne
+
+
+
+## [ ] are the upload files ending up in the DB
+## [ ] real table definitions
+## [ ] sit for test
+## [ ] 

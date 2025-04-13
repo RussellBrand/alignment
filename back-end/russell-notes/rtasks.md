@@ -41,6 +41,8 @@ make tests in a file simple.test.ts to test these routes
 ## [ ] 
 ## [ ] simple writes
 
+put test for this in simple_writes.test.ts
+
 for each model make a route that will produce a simple HTML form, that will submit to the appropriate API 
 
 on success redirect to the appropriate 

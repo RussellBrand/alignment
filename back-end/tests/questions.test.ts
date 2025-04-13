@@ -2,6 +2,7 @@ import request from "supertest";
 import mongoose from "mongoose";
 import { app, connectDB } from "../src/server";
 import { Question } from "../src/models";
+import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 
 // Sample question data
 const testQuestion = {
@@ -9,7 +10,7 @@ const testQuestion = {
 };
 
 describe("Question Routes", () => {
-  let db; //: mongoose.Connection
+  let db: mongoose.Connection;
 
   // Connect to test database once before all tests
   beforeAll(async () => {

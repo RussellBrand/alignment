@@ -14,6 +14,46 @@ const create =
     }
   };
 
+// Generic function to create multiple documents
+const createMany =
+  <T extends Document>(Model: Model<T>) =>
+  async (req: Request, res: Response) => {
+    try {
+      if (!req.body || !Array.isArray(req.body)) {
+        return res
+          .status(400)
+          .json({ error: "Array of documents is required" });
+      }
+
+      // Filter out items without _id and items with _id
+      const itemsWithoutId = req.body.filter((item) => !item._id);
+      const itemsWithId = req.body.filter((item) => item._id);
+
+      const results = [];
+
+      // Insert items without ID
+      if (itemsWithoutId.length > 0) {
+        const insertedDocs = await Model.insertMany(itemsWithoutId);
+        results.push(...insertedDocs);
+      }
+
+      // Update or insert items with ID (upsert)
+      for (const item of itemsWithId) {
+        const { _id, ...updateData } = item;
+        const upsertedDoc = await Model.findByIdAndUpdate(_id, updateData, {
+          new: true,
+          upsert: true,
+        });
+        results.push(upsertedDoc);
+      }
+
+      res.status(201).json(results);
+    } catch (error: unknown) {
+      const err = error as Error;
+      res.status(400).json({ error: err.message });
+    }
+  };
+
 // Generic function to read all documents
 const readAll =
   <T extends Document>(Model: Model<T>) =>
@@ -116,6 +156,22 @@ const patch =
     }
   };
 
+// Generic function to delete all documents
+const deleteAll =
+  <T extends Document>(Model: Model<T>) =>
+  async (_req: Request, res: Response) => {
+    try {
+      const result = await Model.deleteMany({});
+      res.status(200).json({
+        message: "All documents deleted successfully",
+        count: result.deletedCount,
+      });
+    } catch (error: unknown) {
+      const err = error as Error;
+      res.status(500).json({ error: err.message });
+    }
+  };
+
 // Generic function to delete one document
 const deleteOne =
   <T extends Document>(Model: Model<T>) =>
@@ -134,10 +190,12 @@ const deleteOne =
 
 export default {
   create,
+  createMany,
   readAll,
   readOne,
   readMany,
   update,
   patch,
+  deleteAll,
   delete: deleteOne,
 };

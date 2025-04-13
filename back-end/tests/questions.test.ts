@@ -200,7 +200,46 @@ describe("Question Routes", () => {
     });
   });
 
-  describe("POST /api/questions/many", () => {
+  describe("DELETE /api/questions", () => {
+    it("should delete all questions", async () => {
+      // Create multiple questions
+      await request(app).post("/api/questions").send({ text: "Question 1" });
+      await request(app).post("/api/questions").send({ text: "Question 2" });
+      await request(app).post("/api/questions").send({ text: "Question 3" });
+
+      // Verify questions exist
+      const beforeDelete = await request(app).get("/api/questions");
+      expect(beforeDelete.status).toBe(200);
+      expect(beforeDelete.body.length).toBe(3);
+
+      // Delete all questions
+      const deleteResponse = await request(app).delete("/api/questions");
+
+      expect(deleteResponse.status).toBe(200);
+      expect(deleteResponse.body).toHaveProperty("message");
+      expect(deleteResponse.body.message).toBe(
+        "All documents deleted successfully"
+      );
+      expect(deleteResponse.body).toHaveProperty("count");
+      expect(deleteResponse.body.count).toBe(3);
+
+      // Verify all questions are deleted
+      const afterDelete = await request(app).get("/api/questions");
+      expect(afterDelete.status).toBe(200);
+      expect(afterDelete.body.length).toBe(0);
+    });
+
+    it("should handle deleting when there are no questions", async () => {
+      // Delete when no questions exist
+      const deleteResponse = await request(app).delete("/api/questions");
+
+      expect(deleteResponse.status).toBe(200);
+      expect(deleteResponse.body).toHaveProperty("count");
+      expect(deleteResponse.body.count).toBe(0);
+    });
+  });
+
+  describe("POST /api/questions/read/many", () => {
     it("should retrieve a question with one ID", async () => {
       // Create one question
       const createResponse = await request(app)
@@ -211,7 +250,7 @@ describe("Question Routes", () => {
 
       // Test readMany with one ID
       const response = await request(app)
-        .post("/api/questions/many")
+        .post("/api/questions/read/many")
         .send({ ids: [questionId] });
 
       expect(response.status).toBe(200);
@@ -239,7 +278,7 @@ describe("Question Routes", () => {
 
       // Test readMany with three IDs
       const response = await request(app)
-        .post("/api/questions/many")
+        .post("/api/questions/read/many")
         .send({ ids });
 
       expect(response.status).toBe(200);
@@ -256,7 +295,7 @@ describe("Question Routes", () => {
     it("should handle an empty array of IDs appropriately", async () => {
       // Test readMany with empty array
       const response = await request(app)
-        .post("/api/questions/many")
+        .post("/api/questions/read/many")
         .send({ ids: [] });
 
       // According to the controller implementation, this should return 404
@@ -276,7 +315,7 @@ describe("Question Routes", () => {
 
       // Test readMany with existing and non-existent IDs
       const response = await request(app)
-        .post("/api/questions/many")
+        .post("/api/questions/read/many")
         .send({ ids: [questionId, nonExistentId] });
 
       // Should still return 200 but with only the documents found
@@ -284,6 +323,93 @@ describe("Question Routes", () => {
       expect(Array.isArray(response.body)).toBe(true);
       expect(response.body.length).toBe(1); // Only one document should be returned
       expect(response.body[0]._id).toBe(questionId);
+    });
+  });
+
+  describe("POST /api/questions/create/many", () => {
+    it("should create multiple new questions without IDs", async () => {
+      const questions = [
+        { text: "Question 1" },
+        { text: "Question 2" },
+        { text: "Question 3" },
+      ];
+
+      const response = await request(app)
+        .post("/api/questions/create/many")
+        .send(questions);
+
+      expect(response.status).toBe(201);
+      expect(Array.isArray(response.body)).toBe(true);
+      expect(response.body.length).toBe(3);
+
+      // Check each question was created with the right text
+      const texts = response.body.map((q) => q.text);
+      expect(texts).toContain("Question 1");
+      expect(texts).toContain("Question 2");
+      expect(texts).toContain("Question 3");
+
+      // Each question should have an _id
+      response.body.forEach((q) => {
+        expect(q).toHaveProperty("_id");
+      });
+    });
+
+    it("should handle creating a mix of new and existing questions", async () => {
+      // First create a question
+      const existingQuestion = await request(app)
+        .post("/api/questions")
+        .send({ text: "Existing question" });
+
+      const existingId = existingQuestion.body._id;
+
+      // Mix of existing and new questions
+      const questions = [
+        { _id: existingId, text: "Updated existing question" },
+        { text: "New question 1" },
+        { text: "New question 2" },
+      ];
+
+      const response = await request(app)
+        .post("/api/questions/create/many")
+        .send(questions);
+
+      expect(response.status).toBe(201);
+      expect(Array.isArray(response.body)).toBe(true);
+      expect(response.body.length).toBe(3);
+
+      // Check that the existing question was updated
+      const updatedQuestion = response.body.find((q) => q._id === existingId);
+      expect(updatedQuestion).toBeDefined();
+      expect(updatedQuestion.text).toBe("Updated existing question");
+
+      // Check that new questions were created
+      const newQuestions = response.body.filter((q) => q._id !== existingId);
+      expect(newQuestions.length).toBe(2);
+
+      // Verify all questions exist in the database
+      const getAllResponse = await request(app).get("/api/questions");
+      expect(getAllResponse.body.length).toBe(3);
+    });
+
+    it("should reject invalid request format", async () => {
+      // Send non-array data
+      const response = await request(app)
+        .post("/api/questions/create/many")
+        .send({ text: "Not an array" });
+
+      expect(response.status).toBe(400);
+      expect(response.body).toHaveProperty("error");
+      expect(response.body.error).toBe("Array of documents is required");
+    });
+
+    it("should handle an empty array request", async () => {
+      const response = await request(app)
+        .post("/api/questions/create/many")
+        .send([]);
+
+      expect(response.status).toBe(201);
+      expect(Array.isArray(response.body)).toBe(true);
+      expect(response.body.length).toBe(0);
     });
   });
 

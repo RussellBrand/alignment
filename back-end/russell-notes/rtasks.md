@@ -17,3 +17,14 @@ https://chatgpt.com/share/67f8c673-574c-800e-a62a-20da64e02757
 ## [ ] make custom routes
 ## [ ] upload questions 
 ## [ ] upload answer types
+
+## [ ] count
+add an API for models that counts the number of records
+including testing in questions.test.ts
+## [ ] simple
+for each model make a route that will produce a simple HTML page for GET
+
+/simple/{MODEL}/count 
+/simple/{MODEL}/readAll
+/simple/{MODEL}/readOne/{ID}
+/simple/{MODEL}/readMany/?ids={ID},{ID},{ID}

@@ -15,7 +15,7 @@ describe("Question Routes", () => {
   // Connect to test database once before all tests
   beforeAll(async () => {
     process.env.NODE_ENV = "test";
-    db = await connectDB();
+    db = await connectDB("_questions");
   });
 
   // Clean up after all tests

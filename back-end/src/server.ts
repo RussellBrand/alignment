@@ -40,12 +40,18 @@ app.get("/", (_req, res) => {
   res.redirect("/simple");
 });
 
-const connectDB = async (): Promise<Connection> => {
-  const mongoURI =
+const connectDB = async (dbSuffix?: string): Promise<Connection> => {
+  const baseMongoURI =
     process.env.NODE_ENV === "test"
       ? process.env.MONGODB_TEST_URI ||
         "mongodb://localhost:27017/alignment_test"
       : process.env.MONGODB_URI || "mongodb://localhost:27017/zod2mongo";
+
+  // Append the suffix to the database name if provided
+  let mongoURI = baseMongoURI;
+  if (dbSuffix) {
+    mongoURI += dbSuffix;
+  }
 
   try {
     await mongoose.connect(mongoURI);

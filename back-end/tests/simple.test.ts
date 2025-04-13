@@ -24,7 +24,7 @@ describe("Simple HTML Routes", () => {
   afterAll(async () => {
     await mongoose.connection.dropDatabase();
     await mongoose.disconnect();
-    console.log("Test database dropped and disconnected");
+    // console.log("Test database dropped and disconnected");
   });
 
   // Clear test data and add some test documents before each test
@@ -225,16 +225,16 @@ describe("Simple HTML Routes", () => {
       const question2Id = question2._id.toString();
 
       // Log the question IDs to verify they exist
-      console.log("Test question IDs:", { questionId, question2Id });
+      // console.log("Test question IDs:", { questionId, question2Id });
 
       // Verify the questions exist in the database
       const existingQuestions = await Question.find({
         _id: { $in: [questionId, question2Id] },
       });
-      console.log(
-        "Found questions in DB:",
-        existingQuestions.map((q) => ({ id: q._id.toString(), text: q.text }))
-      );
+      // console.log(
+      //   "Found questions in DB:",
+      //   existingQuestions.map((q) => ({ id: q._id.toString(), text: q.text }))
+      // );
 
       const response = await request(app).get(
         `/simple/questions/readMany?ids=${questionId},${question2Id}`

@@ -168,24 +168,24 @@ const readMany =
 
       // Convert string IDs to MongoDB ObjectIDs - this avoids issues with string comparison
       // Log both the IDs we're looking for and the found documents to help debug
-      console.log(`Looking for IDs: ${ids.join(", ")}`);
+      //       console.log(`Looking for IDs: ${ids.join(", ")}`);
 
       // Get all documents in one query
       const documents = await Model.find();
-      console.log(`All documents: ${documents.length}`);
-      documents.forEach((doc) =>
-        console.log(
-          `- Document: ${
-            doc._id
-          } (${doc._id.toString()}), Text: ${JSON.stringify(doc.toObject())}`
-        )
-      );
-
+      //       console.log(`All documents: ${documents.length}`);
+      // documents.forEach((doc) =>
+      //   console.log(
+      //     `- Document: ${
+      //       doc._id
+      //     } (${doc._id.toString()}), Text: ${JSON.stringify(doc.toObject())}`
+      //   )
+      // );
+      // 
       // Now filter just the ones we want by ID
       const requestedDocuments = documents.filter((doc) =>
         ids.includes(doc._id.toString())
       );
-      console.log(`Found ${requestedDocuments.length} requested documents`);
+      //       console.log(`Found ${requestedDocuments.length} requested documents`);
 
       if (requestedDocuments.length === 0) {
         return res

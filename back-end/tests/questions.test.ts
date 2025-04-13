@@ -22,7 +22,7 @@ describe("Question Routes", () => {
   afterAll(async () => {
     await mongoose.connection.dropDatabase();
     await mongoose.disconnect();
-    console.log("Test database dropped and disconnected");
+    // console.log("Test database dropped and disconnected");
   });
 
   // Clear test data before each test

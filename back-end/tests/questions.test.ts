@@ -200,6 +200,93 @@ describe("Question Routes", () => {
     });
   });
 
+  describe("POST /api/questions/many", () => {
+    it("should retrieve a question with one ID", async () => {
+      // Create one question
+      const createResponse = await request(app)
+        .post("/api/questions")
+        .send(testQuestion);
+
+      const questionId = createResponse.body._id;
+
+      // Test readMany with one ID
+      const response = await request(app)
+        .post("/api/questions/many")
+        .send({ ids: [questionId] });
+
+      expect(response.status).toBe(200);
+      expect(Array.isArray(response.body)).toBe(true);
+      expect(response.body.length).toBe(1);
+      expect(response.body[0]._id).toBe(questionId);
+      expect(response.body[0].text).toBe(testQuestion.text);
+    });
+
+    it("should retrieve multiple questions with multiple IDs", async () => {
+      // Create three questions
+      const question1 = await request(app)
+        .post("/api/questions")
+        .send({ text: "First question" });
+
+      const question2 = await request(app)
+        .post("/api/questions")
+        .send({ text: "Second question" });
+
+      const question3 = await request(app)
+        .post("/api/questions")
+        .send({ text: "Third question" });
+
+      const ids = [question1.body._id, question2.body._id, question3.body._id];
+
+      // Test readMany with three IDs
+      const response = await request(app)
+        .post("/api/questions/many")
+        .send({ ids });
+
+      expect(response.status).toBe(200);
+      expect(Array.isArray(response.body)).toBe(true);
+      expect(response.body.length).toBe(3);
+
+      // Verify each question is retrieved correctly
+      const texts = response.body.map((q) => q.text);
+      expect(texts).toContain("First question");
+      expect(texts).toContain("Second question");
+      expect(texts).toContain("Third question");
+    });
+
+    it("should handle an empty array of IDs appropriately", async () => {
+      // Test readMany with empty array
+      const response = await request(app)
+        .post("/api/questions/many")
+        .send({ ids: [] });
+
+      // According to the controller implementation, this should return 404
+      expect(response.status).toBe(404);
+      expect(response.body).toHaveProperty("error");
+      expect(response.body.error).toBe("No documents found");
+    });
+
+    it("should return error when one or more IDs don't exist", async () => {
+      // Create one question
+      const createResponse = await request(app)
+        .post("/api/questions")
+        .send(testQuestion);
+
+      const questionId = createResponse.body._id;
+      const nonExistentId = "60a1234a1234b56789abcdef"; // This ID should not exist
+
+      // Test readMany with existing and non-existent IDs
+      const response = await request(app)
+        .post("/api/questions/many")
+        .send({ ids: [questionId, nonExistentId] });
+
+      // Should still return 200 but with only the documents found
+      expect(response.status).toBe(200);
+      expect(Array.isArray(response.body)).toBe(true);
+      expect(response.body.length).toBe(1); // Only one document should be returned
+      expect(response.body[0]._id).toBe(questionId);
+    });
+  });
+
   describe("PATCH /api/questions/:id", () => {
     it("should partially update an existing question", async () => {
       // First create a question

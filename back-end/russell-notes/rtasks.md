@@ -21,10 +21,58 @@ https://chatgpt.com/share/67f8c673-574c-800e-a62a-20da64e02757
 ## [ ] count
 add an API for models that counts the number of records
 including testing in questions.test.ts
-## [ ] simple
+## [ ] simple reads
 for each model make a route that will produce a simple HTML page for GET
 
-/simple/{MODEL}/count 
-/simple/{MODEL}/readAll
-/simple/{MODEL}/readOne/{ID}
-/simple/{MODEL}/readMany/?ids={ID},{ID},{ID}
+simple/{MODEL}/count 
+
+simple/{MODEL}/readAll
+
+simple/{MODEL}/readOne/{ID}
+
+simple/{MODEL}/readMany/?ids={ID},{ID},{ID}
+
+make tests in a file simple.test.ts to test these routes
+
+
+## [ ] simple -- no id's on lines, give a form
+## [ ] simple -- move the "back" link to the top
+## [ ] simple -- toc -- have per object counts
+## [ ] 
+## [ ] simple writes
+
+for each model make a route that will produce a simple HTML form, that will submit to the appropriate API 
+
+on success redirect to the appropriate 
+
+simple/{MODEL}/
+
+page
+
+on failure give a clear error message and let the user try again.
+
+
+
+* simple/{MODEL}/new 
+produces a form 
+calls create
+
+* simple/{MODEL}/upload-csv
+let user upload a csv file 
+calls   createMany,
+
+* simple/{MODEL}/upload-json
+let user upload a json file 
+calls   createMany,
+
+* simple/{MODEL}/edit
+produces a form 
+calls update
+
+* simple/{MODEL}/delete
+calls deleteOne
+
+* simple/{MODEL}/deleteAll
+give the user a button
+require confirmation
+calls deleteOne

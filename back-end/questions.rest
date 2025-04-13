@@ -31,3 +31,6 @@ Content-Type: application/json
     "text": "death",
     "nope": "never"
 }
+
+###
+GET http://localhost:3000/simple/questions/count

@@ -1,8 +1,11 @@
 import express, { Application } from "express";
 import mongoose, { Connection } from "mongoose";
+import passport from "./config/passport";
+import session from "express-session";
 import createRoutes from "./routes/crudRoutes";
 import createSimpleRoutes from "./routes/simpleRoutes";
 import simpleController from "./controllers/simpleController";
+import authRoutes from "./routes/auth/authRoutes";
 
 // Import directly from individual schema files
 import { userSchema, User, type IUser } from "./schemas/userSchema";
@@ -16,6 +19,23 @@ import { whenceSchema, Whence, type IWhence } from "./schemas/whenceSchema";
 
 const app: Application = express();
 app.use(express.json());
+
+// Session configuration
+app.use(
+  session({
+    secret: process.env.SESSION_SECRET || "your_session_secret",
+    resave: false,
+    saveUninitialized: false,
+    cookie: { secure: process.env.NODE_ENV === "production" },
+  })
+);
+
+// Initialize Passport and session
+app.use(passport.initialize());
+app.use(passport.session());
+
+// Authentication routes
+app.use("/api/auth", authRoutes);
 
 // Regular API routes
 app.use("/api/users", createRoutes<IUser>(User, userSchema));
@@ -59,6 +79,13 @@ const connectDB = async (dbSuffix?: string): Promise<Connection> => {
   } catch (error) {
     const err = error as Error;
     console.error("MongoDB connection error:", err.message);
+
+    // In test environments, throw the error instead of exiting the process
+    // This allows tests to catch and handle the error properly
+    if (process.env.NODE_ENV === "test") {
+      throw error;
+    }
+
     process.exit(1);
   }
 };

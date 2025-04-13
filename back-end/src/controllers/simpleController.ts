@@ -297,6 +297,9 @@ const newForm =
   async (_req: Request, res: Response) => {
     try {
       const modelName = Model.modelName;
+      const singularName = modelName.toLowerCase().endsWith("s")
+        ? modelName.toLowerCase().slice(0, -1)
+        : modelName.toLowerCase();
 
       // Extract field information from the Zod schema
       const shape = (schema as any)._def.shape();
@@ -322,7 +325,7 @@ const newForm =
       });
 
       const content = `
-      <form action="/simple/${modelName.toLowerCase()}/create" method="POST">
+      <form action="/simple/${singularName}/create" method="POST">
         ${formFields}
         <button type="submit">Create ${modelName}</button>
       </form>
@@ -343,6 +346,9 @@ const create =
   async (req: Request, res: Response) => {
     try {
       const modelName = Model.modelName;
+      const singularName = modelName.toLowerCase().endsWith("s")
+        ? modelName.toLowerCase().slice(0, -1)
+        : modelName.toLowerCase();
 
       // Parse and validate input using Zod schema
       const validationResult = schema.safeParse(req.body);
@@ -373,8 +379,8 @@ const create =
       // Create the document
       const document = await Model.create(validationResult.data);
 
-      // Redirect to the readAll page
-      res.redirect(`/simple/${modelName.toLowerCase()}/readAll`);
+      // Redirect to the readAll page with singular form as expected by tests
+      res.redirect(`/simple/${singularName}/readAll`);
     } catch (error: unknown) {
       const err = error as Error;
       res
@@ -389,6 +395,9 @@ const editForm =
   async (req: Request, res: Response) => {
     try {
       const modelName = Model.modelName;
+      const singularName = modelName.toLowerCase().endsWith("s")
+        ? modelName.toLowerCase().slice(0, -1)
+        : modelName.toLowerCase();
       const document = await Model.findById(req.params.id);
 
       if (!document) {
@@ -425,9 +434,7 @@ const editForm =
       });
 
       const content = `
-      <form action="/simple/${modelName.toLowerCase()}/update/${
-        document._id
-      }" method="POST">
+      <form action="/simple/${singularName}/update/${document._id}" method="POST">
         <input type="hidden" name="_id" value="${document._id}">
         ${formFields}
         <button type="submit">Update ${modelName}</button>
@@ -519,6 +526,9 @@ const deleteForm =
   async (req: Request, res: Response) => {
     try {
       const modelName = Model.modelName;
+      const singularName = modelName.toLowerCase().endsWith("s")
+        ? modelName.toLowerCase().slice(0, -1)
+        : modelName.toLowerCase();
       const document = await Model.findById(req.params.id);
 
       if (!document) {
@@ -548,7 +558,7 @@ const deleteForm =
       const content = `
       <h2>Are you sure you want to delete this ${modelName}?</h2>
       ${documentDetails}
-      <form action="/simple/${modelName.toLowerCase()}/delete/${
+      <form action="/simple/${singularName}/delete/${
         document._id
       }" method="POST">
         <button type="submit" class="delete">Confirm Delete</button>

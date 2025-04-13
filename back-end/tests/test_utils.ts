@@ -2,48 +2,14 @@
  * Utility functions for test files
  */
 
-const path = require("path");
 import mongoose from "mongoose";
-import { connectDB } from "../src/server";
-import { Question } from "../src/schemas/questionSchema";
+import path from "path";
+import { app, connectDB } from "../src/server";
 import { User } from "../src/schemas/userSchema";
+import { Question } from "../src/schemas/questionSchema";
 import { Quote } from "../src/schemas/quoteSchema";
 import { Whence } from "../src/schemas/whenceSchema";
 
-/**
- * Computes a unique database name for tests based on the file name
- * @param filePath The path to the test file
- * @returns A database name with "_" prefix and dots replaced by underscores
- */
-export function computeDBname(filePath: string): string {
-  const fileName = path.basename(filePath);
-  return "_" + fileName.replace(/\./g, "_");
-}
-
-/**
- * Sets up the database connection for testing
- * @param dbName Name of the test database
- * @returns A Promise that resolves to the database connection
- */
-export async function setupTestDB(
-  dbName: string
-): Promise<mongoose.Connection> {
-  process.env.NODE_ENV = "test";
-  return await connectDB(dbName);
-}
-
-/**
- * Cleans up the database connection after testing
- * @returns A Promise that resolves when the connection is closed
- */
-export async function teardownTestDB(): Promise<void> {
-  await mongoose.connection.dropDatabase();
-  await mongoose.disconnect();
-}
-
-/**
- * Interface for IDs returned from createTestData
- */
 export interface TestIDs {
   questionId: string;
   userId: string;
@@ -52,41 +18,85 @@ export interface TestIDs {
 }
 
 /**
- * Creates test data in the database
- * @returns A Promise that resolves to an object containing the created document IDs
+ * Computes a unique database name based on the test file name
+ * Ensures the name is valid for MongoDB (no periods, etc.)
+ */
+export function computeDBname(fileName: string): string {
+  // Extract basename and remove extension
+  const baseName = path.basename(fileName, path.extname(fileName));
+  // Replace any non-alphanumeric characters with underscores to avoid MongoDB name restrictions
+  const sanitizedName = baseName.replace(/[^a-zA-Z0-9]/g, "_");
+  // Add timestamp to ensure uniqueness
+  const timestamp = new Date().getTime();
+  return `test_${sanitizedName}_${timestamp}`;
+}
+
+/**
+ * Sets up a test database with a unique name
+ */
+export async function setupTestDB(
+  dbName: string
+): Promise<mongoose.Connection> {
+  try {
+    // Connect to a test database with a unique name
+    const db = await connectDB(`_${dbName}`);
+
+    // Clear all collections to ensure a clean state
+    await Promise.all([
+      User.deleteMany({}),
+      Question.deleteMany({}),
+      Quote.deleteMany({}),
+      Whence.deleteMany({}),
+    ]);
+
+    return db;
+  } catch (error) {
+    console.error("Test database setup failed:", error);
+    throw error; // Re-throw to ensure tests fail properly
+  }
+}
+
+/**
+ * Tears down the test database connection
+ */
+export async function teardownTestDB(): Promise<void> {
+  try {
+    await mongoose.connection.close();
+  } catch (error) {
+    console.error("Test database teardown failed:", error);
+  }
+}
+
+/**
+ * Creates test data for all models and returns their IDs
  */
 export async function createTestData(): Promise<TestIDs> {
-  // Clean all collections
-  await Question.deleteMany({});
-  await User.deleteMany({});
-  await Quote.deleteMany({});
-  await Whence.deleteMany({});
-
-  // Create test data for each model
+  // Create test question
   const question = await Question.create({
     text: "What is a test question?",
   });
-  const questionId = question._id.toString();
 
+  // Create test user with minimal fields (password is optional in test env)
   const user = await User.create({
     name: "Test User",
     email: "test@example.com",
   });
-  const userId = user._id.toString();
 
+  // Create test quote
   const quote = await Quote.create({
     text: "This is a test quote",
     author: "Test Author",
   });
-  const quoteId = quote._id.toString();
 
-  const whence = await Whence.create({ source: "Test Source" });
-  const whenceId = whence._id.toString();
+  // Create test whence
+  const whence = await Whence.create({
+    source: "Test Source",
+  });
 
   return {
-    questionId,
-    userId,
-    quoteId,
-    whenceId,
+    questionId: question._id.toString(),
+    userId: user._id.toString(),
+    quoteId: quote._id.toString(),
+    whenceId: whence._id.toString(),
   };
 }

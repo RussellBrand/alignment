@@ -89,7 +89,9 @@ calls deleteOne
 
 ## [ ] hash of full pathname
 ## [ ] 
-## [ ] 
+
 ## [ ] merge failed auth -> master
 
 
+
+## [ ] make questions -> singular everywhere

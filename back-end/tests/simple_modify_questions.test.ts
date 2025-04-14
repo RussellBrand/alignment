@@ -40,7 +40,7 @@ describe("Simple HTML Modification Routes", () => {
       expect(response.status).toBe(200);
       expect(response.text).toContain("New Question");
       expect(response.text).toContain("<form");
-      expect(response.text).toContain('action="/simple/question/create"');
+      expect(response.text).toContain('action="/simple/questions/create"');
       expect(response.text).toContain('method="POST"');
       expect(response.text).toContain("Text");
     });
@@ -56,7 +56,7 @@ describe("Simple HTML Modification Routes", () => {
 
       // Should redirect to the readAll page after creation
       expect(response.status).toBe(302);
-      expect(response.header.location).toBe("/simple/question/readAll");
+      expect(response.header.location).toBe("/simple/questions/readAll");
 
       // Verify the question was created in the database
       const createdQuestion = await Question.findOne({
@@ -92,7 +92,7 @@ describe("Simple HTML Modification Routes", () => {
       expect(response.text).toContain("Edit Question");
       expect(response.text).toContain("<form");
       expect(response.text).toContain(
-        `action="/simple/question/update/${questionId}"`
+        `action="/simple/questions/update/${questionId}"`
       );
       expect(response.text).toContain('method="POST"');
       expect(response.text).toContain("What is a test question?"); // existing question text
@@ -165,7 +165,7 @@ describe("Simple HTML Modification Routes", () => {
 
       // Should redirect to the readAll page after deletion
       expect(response.status).toBe(302);
-      expect(response.header.location).toBe("/simple/question/readAll");
+      expect(response.header.location).toBe("/simple/questions/readAll");
 
       // Verify the question was deleted from the database
       const deletedQuestion = await Question.findById(questionId);
@@ -214,7 +214,7 @@ describe("Simple HTML Modification Routes", () => {
 
       // Should redirect to the readAll page after deletion
       expect(response.status).toBe(302);
-      expect(response.header.location).toBe("/simple/question/readAll");
+      expect(response.header.location).toBe("/simple/questions/readAll");
 
       // Verify all questions were deleted from the database
       const questionsAfter = await Question.countDocuments();

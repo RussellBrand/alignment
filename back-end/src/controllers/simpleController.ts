@@ -6,6 +6,10 @@ import { parse } from "csv-parse/sync";
 import multer from "multer";
 import path from "path";
 
+function modelNameToRouteComponent(modelName: string): string {
+  return modelName.replace(/([a-z])([A-Z])/g, "$1-$2").toLowerCase() + "s";
+}
+
 // Create a storage configuration that ensures the uploads directory exists
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
@@ -125,10 +129,10 @@ const readAll =
       const content = `
       <p>Total: ${documents.length} ${modelName}(s)</p>
       <div class="back-link">
-        <a href="/simple/${modelName.toLowerCase()}/new">Add New ${modelName}</a> | 
-        <a href="/simple/${modelName.toLowerCase()}/upload-csv">Upload CSV</a> | 
-        <a href="/simple/${modelName.toLowerCase()}/upload-json">Upload JSON</a> |
-        <a href="/simple/${modelName.toLowerCase()}/deleteAll">Delete All</a>
+        <a href="/simple/${modelNameToRouteComponent(modelName)}/new">Add New ${modelName}</a> | 
+        <a href="/simple/${modelNameToRouteComponent(modelName)}/upload-csv">Upload CSV</a> | 
+        <a href="/simple/${modelNameToRouteComponent(modelName)}/upload-json">Upload JSON</a> |
+        <a href="/simple/${modelNameToRouteComponent(modelName)}/deleteAll">Delete All</a>
       </div>
       ${documentsHtml}
       <pre>${JSON.stringify(documents, null, 2)}</pre>
@@ -178,10 +182,10 @@ const readOne =
 
       const content = `
       <div class="actions">
-        <a href="/simple/${modelName.toLowerCase()}/edit/${
+        <a href="/simple/${modelNameToRouteComponent(modelName)}/edit/${
         document._id
       }">Edit</a> | 
-        <a href="/simple/${modelName.toLowerCase()}/delete/${
+        <a href="/simple/${modelNameToRouteComponent(modelName)}/delete/${
         document._id
       }">Delete</a>
       </div>
@@ -297,9 +301,6 @@ const newForm =
   async (_req: Request, res: Response) => {
     try {
       const modelName = Model.modelName;
-      const singularName = modelName.toLowerCase().endsWith("s")
-        ? modelName.toLowerCase().slice(0, -1)
-        : modelName.toLowerCase();
 
       // Extract field information from the Zod schema
       const shape = (schema as any)._def.shape();
@@ -325,7 +326,9 @@ const newForm =
       });
 
       const content = `
-      <form action="/simple/${singularName}/create" method="POST">
+      <form action="/simple/${modelNameToRouteComponent(
+        modelName
+      )}/create" method="POST">
         ${formFields}
         <button type="submit">Create ${modelName}</button>
       </form>
@@ -346,9 +349,6 @@ const create =
   async (req: Request, res: Response) => {
     try {
       const modelName = Model.modelName;
-      const singularName = modelName.toLowerCase().endsWith("s")
-        ? modelName.toLowerCase().slice(0, -1)
-        : modelName.toLowerCase();
 
       // Parse and validate input using Zod schema
       const validationResult = schema.safeParse(req.body);
@@ -369,7 +369,7 @@ const create =
             <h2>Validation Error</h2>
             ${errorMessages}
             <div class="back-link">
-              <a href="/simple/${modelName.toLowerCase()}/new">Back to Form</a>
+              <a href="/simple/${modelNameToRouteComponent(modelName)}/new">Back to Form</a>
             </div>
           `
           )
@@ -380,7 +380,7 @@ const create =
       const document = await Model.create(validationResult.data);
 
       // Redirect to the readAll page with singular form as expected by tests
-      res.redirect(`/simple/${singularName}/readAll`);
+      res.redirect(`/simple/${modelNameToRouteComponent(modelName)}/readAll`);
     } catch (error: unknown) {
       const err = error as Error;
       res
@@ -395,9 +395,7 @@ const editForm =
   async (req: Request, res: Response) => {
     try {
       const modelName = Model.modelName;
-      const singularName = modelName.toLowerCase().endsWith("s")
-        ? modelName.toLowerCase().slice(0, -1)
-        : modelName.toLowerCase();
+
       const document = await Model.findById(req.params.id);
 
       if (!document) {
@@ -434,7 +432,9 @@ const editForm =
       });
 
       const content = `
-      <form action="/simple/${singularName}/update/${document._id}" method="POST">
+      <form action="/simple/${modelNameToRouteComponent(modelName)}/update/${
+        document._id
+      }" method="POST">
         <input type="hidden" name="_id" value="${document._id}">
         ${formFields}
         <button type="submit">Update ${modelName}</button>
@@ -500,7 +500,7 @@ const update =
             <h2>Validation Error</h2>
             ${errorMessages}
             <div class="back-link">
-              <a href="/simple/${modelName.toLowerCase()}/edit/${id}">Back to Edit Form</a>
+              <a href="/simple/${modelNameToRouteComponent(modelName)}/edit/${id}">Back to Edit Form</a>
             </div>
           `
           )
@@ -511,7 +511,7 @@ const update =
       await Model.findByIdAndUpdate(id, validationResult.data);
 
       // Redirect to the readAll page
-      res.redirect(`/simple/${modelName.toLowerCase()}/readAll`);
+      res.redirect(`/simple/${modelNameToRouteComponent(modelName)}/readAll`);
     } catch (error: unknown) {
       const err = error as Error;
       res
@@ -526,9 +526,7 @@ const deleteForm =
   async (req: Request, res: Response) => {
     try {
       const modelName = Model.modelName;
-      const singularName = modelName.toLowerCase().endsWith("s")
-        ? modelName.toLowerCase().slice(0, -1)
-        : modelName.toLowerCase();
+
       const document = await Model.findById(req.params.id);
 
       if (!document) {
@@ -558,13 +556,13 @@ const deleteForm =
       const content = `
       <h2>Are you sure you want to delete this ${modelName}?</h2>
       ${documentDetails}
-      <form action="/simple/${singularName}/delete/${
+      <form action="/simple/${modelNameToRouteComponent(modelName)}/delete/${
         document._id
       }" method="POST">
         <button type="submit" class="delete">Confirm Delete</button>
       </form>
       <div class="back-link" style="margin-top: 20px;">
-        <a href="/simple/${modelName.toLowerCase()}/readAll">Cancel</a>
+        <a href="/simple/${modelNameToRouteComponent(modelName)}/readAll">Cancel</a>
       </div>
       `;
 
@@ -599,7 +597,7 @@ const deleteOne =
       }
 
       // Redirect to the readAll page
-      res.redirect(`/simple/${modelName.toLowerCase()}/readAll`);
+      res.redirect(`/simple/${modelNameToRouteComponent(modelName)}/readAll`);
     } catch (error: unknown) {
       const err = error as Error;
       res
@@ -621,11 +619,11 @@ const deleteAllForm =
       <p>This will permanently delete all ${count} ${modelName}(s) in the database.</p>
       <p><strong>This action cannot be undone!</strong></p>
       
-      <form action="/simple/${modelName.toLowerCase()}/deleteAll" method="POST">
+      <form action="/simple/${modelNameToRouteComponent(modelName)}/deleteAll" method="POST">
         <button type="submit" class="delete">Confirm Delete All</button>
       </form>
       <div class="back-link" style="margin-top: 20px;">
-        <a href="/simple/${modelName.toLowerCase()}/readAll">Cancel</a>
+        <a href="/simple/${modelNameToRouteComponent(modelName)}/readAll">Cancel</a>
       </div>
       `;
 
@@ -648,7 +646,7 @@ const deleteAll =
       await Model.deleteMany({});
 
       // Redirect to the readAll page
-      res.redirect(`/simple/${modelName.toLowerCase()}/readAll`);
+      res.redirect(`/simple/${modelNameToRouteComponent(modelName)}/readAll`);
     } catch (error: unknown) {
       const err = error as Error;
       res
@@ -669,7 +667,7 @@ const csvUploadForm =
       <p>Upload a CSV file to create multiple ${modelName} records at once.</p>
       <p>The first row should contain field names that match the ${modelName} fields.</p>
       
-      <form action="/simple/${modelName.toLowerCase()}/process-csv" method="POST" enctype="multipart/form-data">
+      <form action="/simple/${modelNameToRouteComponent(modelName)}/process-csv" method="POST" enctype="multipart/form-data">
         <div>
           <label for="csvFile">Select CSV File:</label>
           <input type="file" id="csvFile" name="file" accept=".csv" required>
@@ -739,7 +737,7 @@ const processCSV =
             <p>${errors.length} errors found in the CSV file:</p>
             <ul>${errorList}</ul>
             <div class="back-link">
-              <a href="/simple/${modelName.toLowerCase()}/upload-csv">Try Again</a>
+              <a href="/simple/${modelNameToRouteComponent(modelName)}/upload-csv">Try Again</a>
             </div>
           `
           )
@@ -752,7 +750,7 @@ const processCSV =
       }
 
       // Redirect to the readAll page with a success message
-      res.redirect(`/simple/${modelName.toLowerCase()}/readAll`);
+      res.redirect(`/simple/${modelNameToRouteComponent(modelName)}/readAll`);
     } catch (error: unknown) {
       const err = error as Error;
       res
@@ -773,7 +771,7 @@ const jsonUploadForm =
       <p>Upload a JSON file to create multiple ${modelName} records at once.</p>
       <p>The JSON should be an array of objects with fields that match the ${modelName} schema.</p>
       
-      <form action="/simple/${modelName.toLowerCase()}/process-json" method="POST" enctype="multipart/form-data">
+      <form action="/simple/${modelNameToRouteComponent(modelName)}/process-json" method="POST" enctype="multipart/form-data">
         <div>
           <label for="jsonFile">Select JSON File:</label>
           <input type="file" id="jsonFile" name="file" accept=".json" required>
@@ -856,7 +854,7 @@ const processJSON =
             <p>${errors.length} errors found in the JSON file:</p>
             <ul>${errorList}</ul>
             <div class="back-link">
-              <a href="/simple/${modelName.toLowerCase()}/upload-json">Try Again</a>
+              <a href="/simple/${modelNameToRouteComponent(modelName)}/upload-json">Try Again</a>
             </div>
           `
           )
@@ -869,7 +867,7 @@ const processJSON =
       }
 
       // Redirect to the readAll page with a success message
-      res.redirect(`/simple/${modelName.toLowerCase()}/readAll`);
+      res.redirect(`/simple/${modelNameToRouteComponent(modelName)}/readAll`);
     } catch (error: unknown) {
       const err = error as Error;
       res

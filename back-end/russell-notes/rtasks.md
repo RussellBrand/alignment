@@ -95,3 +95,20 @@ calls deleteOne
 
 
 ## [ ] make questions -> singular everywhere
+
+## [ ] plural
+
+make all modelnames, types and schemas singular
+
+make all route and tablenames
+
+start by updating the test files.
+
+create `src/util/normalize_names.ts` for all conversion between  
+
+- routines singular & plural
+- modelnames and routes
+etc
+
+run all the tests to verify that the changes still work
+x

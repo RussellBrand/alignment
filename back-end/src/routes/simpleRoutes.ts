@@ -9,10 +9,6 @@ const createSimpleRoutes = <T extends Document>(
   schema: z.ZodType = z.object({}) // Default empty schema as fallback
 ): Router => {
   const router = express.Router();
-  const modelName = Model.modelName.toLowerCase();
-  const singularName = modelName.endsWith("s")
-    ? modelName.slice(0, -1)
-    : modelName;
 
   // Read routes (existing)
   router.get("/count", simpleController.count(Model));
@@ -28,13 +24,6 @@ const createSimpleRoutes = <T extends Document>(
     simpleController.create(Model, schema)
   );
 
-  // Also support singular form for create as expected by tests
-  router.post(
-    `/${singularName}/create`,
-    express.urlencoded({ extended: true }),
-    simpleController.create(Model, schema)
-  );
-
   // Edit and update routes
   router.get("/edit/:id", simpleController.editForm(Model));
   router.post(
@@ -43,22 +32,9 @@ const createSimpleRoutes = <T extends Document>(
     simpleController.update(Model, schema)
   );
 
-  // Also support singular form for update as expected by tests
-  router.post(
-    `/${singularName}/update/:id`,
-    express.urlencoded({ extended: true }),
-    simpleController.update(Model, schema)
-  );
-
   // Delete routes
   router.get("/delete/:id", simpleController.deleteForm(Model));
   router.post("/delete/:id", simpleController.deleteOne(Model));
-
-  // Also support singular form for delete as expected by tests
-  router.post(`/${singularName}/delete/:id`, simpleController.deleteOne(Model));
-
-  // Support singular form for reading as expected by tests
-  router.get(`/${singularName}/readAll`, simpleController.readAll(Model));
 
   // Delete all routes
   router.get("/deleteAll", simpleController.deleteAllForm(Model));

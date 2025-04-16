@@ -959,6 +959,14 @@ const processCSV =
           }
         });
 
+        // Always convert responses field from semicolon-separated string to array
+        if (typeof processedRecord.responses === "string") {
+          processedRecord.responses = processedRecord.responses
+            .split(";")
+            .map((r) => r.trim())
+            .filter((r) => r.length > 0);
+        }
+
         // Validate the processed record
         const validationResult = schema.safeParse(processedRecord);
 

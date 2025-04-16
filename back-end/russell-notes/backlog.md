@@ -1,8 +1,32 @@
+## [ ] IN PROGRESS -- check upload errorful CSV is using sample data
+
+
+## [ ] merge -> master
+
+## [ ] work tree
+git worktree add <path-to-new-directory> <branch-name>
+git worktree add ../branch2 branch2
+## [ ] set up all the schemas
+
+## [ ] star windsurf working on front end
+
+
+
+
 
 ## [ ] check upload errorful JSON is using sample data
+
 ## [ ] check upload sample JSON is using sample data
 ## [ ] check upload sample csv is using sample data
-## [ ] check upload errorful CSV is using sample data
+
+
+
+## [ ] generate all csv from JSON
+## [ ] TOC should have upload from sample per table 
+## [ ] TOC should have upload from sample all table 
+## [ ] TOC should have delete all data all tables
+## [ ] refactor upload related control parts into another file or two
+## [ ] 
 
 
 

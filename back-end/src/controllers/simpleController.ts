@@ -311,7 +311,7 @@ const newForm =
       const modelName = Model.modelName;
 
       // Extract field information from the Zod schema
-      const shape = (schema as any)._def.shape();
+      const shape = schema._def.shape();
       let formFields = "";
 
       // Generate form fields based on schema properties

@@ -2,29 +2,47 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import mongoose from "mongoose";
 import fs from "fs";
 import path from "path";
+import { parse } from "csv-parse/sync"; // We'll use csv-parse to parse the CSV
 import { app, connectDB } from "../src/server";
 import { OpenQuestion } from "../src/schemas/openQuestionSchema";
 import { computeDBname, setupTestDB, teardownTestDB } from "./test_utils";
 
 const testDBname = computeDBname(__filename);
 
-describe("Sample OpenQuestions JSON Upload", () => {
+describe("Sample OpenQuestions CSV Upload", () => {
   let db: mongoose.Connection;
   let sampleData: any[];
 
-  // Path to the sample JSON file
+  // Path to the sample CSV file
   const sampleFilePath = path.join(
     __dirname,
-    "../samples/sample_open_questions.json"
+    "../samples/sample_open_questions.csv"
   );
 
   beforeAll(async () => {
     // Connect to test database
     db = await setupTestDB(testDBname);
 
-    // Read the sample data file
+    // Read the sample CSV file
     const fileContent = fs.readFileSync(sampleFilePath, "utf8");
-    sampleData = JSON.parse(fileContent);
+
+    // Parse the CSV content
+    const records = parse(fileContent, {
+      columns: true, // Treat the first line as headers
+      skip_empty_lines: true,
+      trim: true,
+    });
+
+    // Transform CSV records to match the OpenQuestion schema format
+    sampleData = records.map((record: any) => ({
+      _id: record._id,
+      text: record.text,
+      kind: record.kind,
+      // Split the responses string by commas, trim each response
+      responses: record.responses
+        ? record.responses.split(",").map((r: string) => r.trim())
+        : [],
+    }));
   });
 
   afterAll(async () => {
@@ -32,7 +50,7 @@ describe("Sample OpenQuestions JSON Upload", () => {
     await teardownTestDB();
   });
 
-  it("should upload sample OpenQuestions data to database", async () => {
+  it("should upload sample OpenQuestions data from CSV to database", async () => {
     // Clear any existing data first
     await OpenQuestion.deleteMany({});
 
@@ -42,10 +60,7 @@ describe("Sample OpenQuestions JSON Upload", () => {
       rawResult: true, // Get detailed result
     });
 
-
-    expect(insertResult.insertedCount).toEqual(
-      sampleData.length
-    );
+    expect(insertResult.insertedCount).toEqual(sampleData.length);
 
     // Fetch all documents from the database to verify
     const uploadedQuestions = await OpenQuestion.find({}).lean();
@@ -77,39 +92,36 @@ describe("Sample OpenQuestions JSON Upload", () => {
   });
 
   it("should verify each specific question was uploaded correctly", async () => {
-    // This test will check each specific question by ID
+    // Select a few sample questions to verify in detail
+    // We'll pick the first, fourth and fifth records (if available)
+    const samplesToCheck = Math.min(sampleData.length, 5);
+    const sampleQuestionIds = [];
 
-    // Verify first question
-    const question1 = await OpenQuestion.findById(
-      "60d21b4667d0d8992e610c01"
-    ).lean();
-    expect(question1).toBeDefined();
-    expect(question1?.text).toBe(
-      "What is your preferred programming language?"
-    );
-    expect(question1?.kind).toBe("nominal");
-    expect(question1?.responses).toContain("JavaScript");
-    expect(question1?.responses).toContain("Python");
+    if (sampleData.length > 0) sampleQuestionIds.push(sampleData[0]._id);
+    if (sampleData.length > 3) sampleQuestionIds.push(sampleData[3]._id);
+    if (sampleData.length > 4) sampleQuestionIds.push(sampleData[4]._id);
 
-    // Verify a different question
-    const question4 = await OpenQuestion.findById(
-      "60d21b4667d0d8992e610c04"
-    ).lean();
-    expect(question4).toBeDefined();
-    expect(question4?.text).toBe(
-      "How satisfied are you with your current development environment?"
-    );
-    expect(question4?.kind).toBe("ordinal");
-    expect(question4?.responses).toContain("Very satisfied");
-    expect(question4?.responses).toContain("Neutral");
+    for (const questionId of sampleQuestionIds) {
+      // Find the question in the original sample data
+      const expectedQuestion = sampleData.find((q) => q._id === questionId);
+      expect(expectedQuestion).toBeDefined();
 
-    // Verify the question with the kind typo
-    const question5 = await OpenQuestion.findById(
-      "60d21b4667d0d8992e610c05"
-    ).lean();
-    expect(question5).toBeDefined();
-    expect(question5?.text).toBe("Which database technology do you prefer?");
-    expect(question5?.kind).toBe("nominal");
+      // Find the same question in the database
+      const dbQuestion = await OpenQuestion.findById(questionId).lean();
+      expect(dbQuestion).toBeDefined();
+
+      // Verify all properties match
+      expect(dbQuestion?.text).toBe(expectedQuestion.text);
+      expect(dbQuestion?.kind).toBe(expectedQuestion.kind);
+
+      // Verify responses array
+      expect(dbQuestion?.responses).toHaveLength(
+        expectedQuestion.responses.length
+      );
+      for (const response of expectedQuestion.responses) {
+        expect(dbQuestion?.responses).toContain(response);
+      }
+    }
 
     // Count total questions to confirm all were uploaded
     const count = await OpenQuestion.countDocuments();

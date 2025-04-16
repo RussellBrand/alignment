@@ -96,7 +96,7 @@ calls deleteOne
 
 ## [ ] make questions -> singular everywhere
 
-## [ ] plural
+## [Y] plural
 
 make all modelnames, types and schemas singular
 
@@ -112,3 +112,20 @@ etc
 
 run all the tests to verify that the changes still work
 x
+
+
+
+## [ ] questions
+
+I want to change
+
+	`question` to `openQuestion` or `open_question`
+	
+everwhere as appropriate.
+
+filename, modelnames, types, routes, schema, interfaces, tables, tests, etc.
+
+Give me a list of things that should be changed
+
+	
+	

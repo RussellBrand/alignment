@@ -1,0 +1,36 @@
+###
+GET http://localhost:3000/api/open-questions
+
+###
+PUT http://localhost:3000/api/open-questions/67f8b51221a8087f90d80a84
+Content-Type: application/json
+
+{
+    "_id": "67f8b51221a8087f90d80a84",
+    "text": "updated....."
+    
+}
+
+
+### 
+
+POST http://localhost:3000/api/open-questions
+Content-Type: application/json
+
+{
+    "text": "What is the meaning of life?"
+}
+
+###
+
+
+POST http://localhost:3000/api/open-questions
+Content-Type: application/json
+
+{
+    "text": "death",
+    "nope": "never"
+}
+
+###
+GET http://localhost:3000/simple/open-questions/count

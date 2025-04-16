@@ -10,10 +10,10 @@ import authRoutes from "./routes/auth/authRoutes";
 // Import directly from individual schema files
 import { userSchema, User, type IUser } from "./schemas/userSchema";
 import {
-  questionSchema,
-  Question,
-  type IQuestion,
-} from "./schemas/questionSchema";
+  openQuestionSchema,
+  OpenQuestion,
+  type IOpenQuestion,
+} from "./schemas/openQuestionSchema";
 import { quoteSchema, Quote, type IQuote } from "./schemas/quoteSchema";
 import { whenceSchema, Whence, type IWhence } from "./schemas/whenceSchema";
 
@@ -39,20 +39,38 @@ app.use("/api/auth", authRoutes);
 
 // Regular API routes
 app.use("/api/users", createRoutes<IUser>(User, userSchema));
-app.use("/api/questions", createRoutes<IQuestion>(Question, questionSchema));
+
+// Set up routes for open-questions
+const openQuestionApiRoutes = createRoutes<IOpenQuestion>(
+  OpenQuestion,
+  openQuestionSchema
+);
+app.use("/api/open-questions", openQuestionApiRoutes);
+// Backward compatibility alias for old routes
+app.use("/api/questions", openQuestionApiRoutes);
+
 app.use("/api/quotes", createRoutes<IQuote>(Quote, quoteSchema));
 app.use("/api/whence", createRoutes<IWhence>(Whence, whenceSchema));
 
 // Simple HTML routes - now passing schemas directly
 app.use("/simple/users", createSimpleRoutes(User, userSchema));
-app.use("/simple/questions", createSimpleRoutes(Question, questionSchema));
+
+// Set up simple routes for open-questions
+const openQuestionSimpleRoutes = createSimpleRoutes(
+  OpenQuestion,
+  openQuestionSchema
+);
+app.use("/simple/open-questions", openQuestionSimpleRoutes);
+// Backward compatibility alias for old routes
+app.use("/simple/questions", openQuestionSimpleRoutes);
+
 app.use("/simple/quotes", createSimpleRoutes(Quote, quoteSchema));
 app.use("/simple/whence", createSimpleRoutes(Whence, whenceSchema));
 
 // Dashboard route
 app.get(
   "/simple",
-  simpleController.dashboard(["Users", "Questions", "Quotes", "Whence"])
+  simpleController.dashboard(["Users", "OpenQuestions", "Quotes", "Whence"])
 );
 
 // Redirect root to simple dashboard

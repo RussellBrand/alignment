@@ -18,7 +18,7 @@ const testDBname = computeDBname(__filename);
 
 describe("Simple HTML Routes", () => {
   let db: mongoose.Connection;
-  let questionId: string;
+  let openQuestionId: string;
   let userId: string;
   let quoteId: string;
   let whenceId: string;
@@ -33,7 +33,7 @@ describe("Simple HTML Routes", () => {
 
   beforeEach(async () => {
     const ids: TestIDs = await createTestData();
-    ({ openQuestionId: questionId, userId, quoteId, whenceId } = ids);
+    ({ openQuestionId: openQuestionId, userId, quoteId, whenceId } = ids);
   });
 
   describe("Dashboard", () => {
@@ -43,7 +43,7 @@ describe("Simple HTML Routes", () => {
       expect(response.status).toBe(200);
       expect(response.text).toContain("Simple API Dashboard");
       expect(response.text).toContain("Users");
-      expect(response.text).toContain("Questions");
+      expect(response.text).toContain("OpenQuestions");
       expect(response.text).toContain("Quotes");
       expect(response.text).toContain("Whence");
     });
@@ -57,8 +57,8 @@ describe("Simple HTML Routes", () => {
   });
 
   describe("Count Routes", () => {
-    it("should return Questions count HTML page", async () => {
-      const response = await request(app).get("/simple/questions/count");
+    it("should return OpenQuestions count HTML page", async () => {
+      const response = await request(app).get("/simple/open-questions/count");
 
       expect(response.status).toBe(200);
       expect(response.text).toContain("OpenQuestion Count");
@@ -95,13 +95,13 @@ describe("Simple HTML Routes", () => {
   });
 
   describe("ReadAll Routes", () => {
-    it("should return all Questions as HTML", async () => {
-      const response = await request(app).get("/simple/questions/readAll");
+    it("should return all OpenQuestions as HTML", async () => {
+      const response = await request(app).get("/simple/open-questions/readAll");
 
       expect(response.status).toBe(200);
       expect(response.text).toContain("All OpenQuestions");
       expect(response.text).toContain("What is a test question?");
-      expect(response.text).toContain(questionId);
+      expect(response.text).toContain(openQuestionId);
     });
 
     it("should return all Users as HTML", async () => {
@@ -135,15 +135,15 @@ describe("Simple HTML Routes", () => {
   });
 
   describe("ReadOne Routes", () => {
-    it("should return a single Question as HTML", async () => {
+    it("should return a single OpenQuestion as HTML", async () => {
       const response = await request(app).get(
-        `/simple/questions/readOne/${questionId}`
+        `/simple/open-questions/readOne/${openQuestionId}`
       );
 
       expect(response.status).toBe(200);
       expect(response.text).toContain("OpenQuestion Details");
       expect(response.text).toContain("What is a test question?");
-      expect(response.text).toContain(questionId);
+      expect(response.text).toContain(openQuestionId);
     });
 
     it("should return a single User as HTML", async () => {
@@ -184,7 +184,7 @@ describe("Simple HTML Routes", () => {
     it("should return 404 HTML page for non-existent id", async () => {
       const nonExistentId = "60a1234a1234b56789abcdef"; // This ID should not exist
       const response = await request(app).get(
-        `/simple/questions/readOne/${nonExistentId}`
+        `/simple/open-questions/readOne/${nonExistentId}`
       );
 
       expect(response.status).toBe(404);
@@ -196,7 +196,7 @@ describe("Simple HTML Routes", () => {
   });
 
   describe("ReadMany Routes", () => {
-    it("should return multiple Questions as HTML", async () => {
+    it("should return multiple OpenQuestions as HTML", async () => {
       // Create another question to test with multiple
       const question2 = await OpenQuestion.create({
         text: "Another test question?",
@@ -204,11 +204,11 @@ describe("Simple HTML Routes", () => {
       const question2Id = question2._id.toString();
 
       // Log the question IDs to verify they exist
-      // console.log("Test question IDs:", { questionId, question2Id });
+      // console.log("Test question IDs:", { openQuestionId, question2Id });
 
       // Verify the questions exist in the database
       const existingQuestions = await OpenQuestion.find({
-        _id: { $in: [questionId, question2Id] },
+        _id: { $in: [openQuestionId, question2Id] },
       });
       // console.log(
       //   "Found questions in DB:",
@@ -216,14 +216,14 @@ describe("Simple HTML Routes", () => {
       // );
 
       const response = await request(app).get(
-        `/simple/questions/readMany?ids=${questionId},${question2Id}`
+        `/simple/open-questions/readMany?ids=${openQuestionId},${question2Id}`
       );
 
       expect(response.status).toBe(200);
       expect(response.text).toContain("Multiple OpenQuestions");
       expect(response.text).toContain("What is a test question?");
       expect(response.text).toContain("Another test question?");
-      expect(response.text).toContain(questionId);
+      expect(response.text).toContain(openQuestionId);
       expect(response.text).toContain(question2Id);
     });
 
@@ -287,19 +287,21 @@ describe("Simple HTML Routes", () => {
     it("should display a note about missing IDs", async () => {
       const nonExistentId = "60a1234a1234b56789abcdef"; // This ID should not exist
       const response = await request(app).get(
-        `/simple/questions/readMany?ids=${questionId},${nonExistentId}`
+        `/simple/open-questions/readMany?ids=${openQuestionId},${nonExistentId}`
       );
 
       expect(response.status).toBe(200);
       expect(response.text).toContain("Multiple OpenQuestions");
       expect(response.text).toContain("What is a test question?");
-      expect(response.text).toContain(questionId);
+      expect(response.text).toContain(openQuestionId);
       expect(response.text).toContain("The following IDs were not found:");
       expect(response.text).toContain(nonExistentId);
     });
 
     it("should return 400 for missing ids parameter", async () => {
-      const response = await request(app).get("/simple/questions/readMany");
+      const response = await request(app).get(
+        "/simple/open-questions/readMany"
+      );
 
       expect(response.status).toBe(400);
       expect(response.text).toContain("Bad Request");
@@ -311,7 +313,7 @@ describe("Simple HTML Routes", () => {
       const nonExistentId2 = "60a1234a1234b56789abcdee";
 
       const response = await request(app).get(
-        `/simple/questions/readMany?ids=${nonExistentId1},${nonExistentId2}`
+        `/simple/open-questions/readMany?ids=${nonExistentId1},${nonExistentId2}`
       );
 
       expect(response.status).toBe(404);

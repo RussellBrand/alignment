@@ -6,12 +6,12 @@ import mongoose from "mongoose";
 import path from "path";
 import { app, connectDB } from "../src/server";
 import { User } from "../src/schemas/userSchema";
-import { Question } from "../src/schemas/questionSchema";
+import { OpenQuestion } from "../src/schemas/openQuestionSchema";
 import { Quote } from "../src/schemas/quoteSchema";
 import { Whence } from "../src/schemas/whenceSchema";
 
 export interface TestIDs {
-  questionId: string;
+  openQuestionId: string;
   userId: string;
   quoteId: string;
   whenceId: string;
@@ -41,10 +41,13 @@ export async function setupTestDB(
     // Connect to a test database with a unique name
     const db = await connectDB(`_${dbName}`);
 
+    // Explicitly wait for connection to be fully established
+    await new Promise((resolve) => setTimeout(resolve, 100));
+
     // Clear all collections to ensure a clean state
     await Promise.all([
       User.deleteMany({}),
-      Question.deleteMany({}),
+      OpenQuestion.deleteMany({}),
       Quote.deleteMany({}),
       Whence.deleteMany({}),
     ]);
@@ -71,8 +74,8 @@ export async function teardownTestDB(): Promise<void> {
  * Creates test data for all models and returns their IDs
  */
 export async function createTestData(): Promise<TestIDs> {
-  // Create test question
-  const question = await Question.create({
+  // Create test open question
+  const openQuestion = await OpenQuestion.create({
     text: "What is a test question?",
   });
 
@@ -93,10 +96,15 @@ export async function createTestData(): Promise<TestIDs> {
     source: "Test Source",
   });
 
-  return {
-    questionId: question._id.toString(),
+  const result: any = {
+    openQuestionId: openQuestion._id.toString(),
     userId: user._id.toString(),
     quoteId: quote._id.toString(),
     whenceId: whence._id.toString(),
   };
+
+  // For backward compatibility with existing tests
+  result.questionId = result.openQuestionId;
+
+  return result;
 }

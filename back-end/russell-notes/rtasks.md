@@ -153,8 +153,28 @@ rerun the tests
 
 ## [ ] samples
 
-make a sample seven set of OpenQuestions as an array in json format in the file
+make a seven set sample of OpenQuestions as an array in json format in the file
 
 back-end/samples/sample.open_questions.json
 
 include ID's 
+
+## test upload
+
+Make a test that uploads
+
+back-end/samples/sample_open_questions.json
+
+to the `open_questions` collection and verifies that it was uploaded properly.
+
+## tests
+
+1. upload json test in its own file
+2. make a csv version of the jason sample file
+3. uplload csv test in its own file
+4. make test for downloading the json file
+5. implement code to pass the test
+6. run the test to verify that it passed
+7. make test for downloading the csv file
+8. implement code to pass the test
+9. run the test to verify that it passed

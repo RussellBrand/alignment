@@ -29,7 +29,9 @@ export function computeDBname(fileName: string): string {
   const sanitizedName = baseName.replace(/[^a-zA-Z0-9]/g, "_");
   // Add timestamp to ensure uniqueness
   const timestamp = new Date().getTime();
-  return `test_${sanitizedName}_${timestamp}`;
+  // preventing the name from getting longe than 64 characters downstream
+  // TODO: fix this
+  return `test_${sanitizedName}_${timestamp}`.slice(-40);
 }
 
 /**

@@ -21,6 +21,7 @@ describe("Simple HTML Modification Routes", () => {
   beforeAll(async () => {
     try {
       // Connect directly to a simple database name
+      // TODO: use the test_utility file open function
       db = await connectDB(`_${SIMPLE_TEST_DB}`);
 
       // Clear all collections to ensure a clean state

@@ -1,0 +1,84 @@
+[
+  {
+    "_id": "60d21b4667d0d8992e610c01",
+    "text": "What is your preferred programming language?",
+    "kind": "nominal",
+    "responses": [
+      "JavaScript",
+      "Python",
+      "TypeScript",
+      "Java",
+      "C#"
+    ]
+  },
+  {
+    "_id": "60d21b4667d0d8992e610c02",
+    "text": "How would you rate your experience with Express.js?",
+    "kind": "ordinal",
+    "responses": [
+      "Beginner",
+      "Intermediate",
+      "Advanced",
+      "Expert"
+    ]
+  },
+  {
+    "_id": "60d21b4667d0d8992e610c03",
+    "text": "Which front-end framework do you use most often?",
+    "kind": "nominal",
+    "responses": [
+      "React",
+      "Vue",
+      "Angular",
+      "Svelte"
+    ]
+  },
+  {
+    "_id": "60d21b4667d0d8992e610c04",
+    "text": "How satisfied are you with your current development environment?",
+    "kind": "ordinal",
+    "responses": [
+      "Very dissatisfied",
+      "Somewhat dissatisfied",
+      "Neutral",
+      "Somewhat satisfied",
+      "Very satisfied"
+    ]
+  },
+  {
+    "_id": "60d21b4667d0d8992e610c05",
+    "text": "Which database technology do you prefer?",
+    "kind": "nominal",
+    "responses": [
+      "MongoDB",
+      "PostgreSQL",
+      "MySQL",
+      "SQLite",
+      "Redis"
+    ]
+  },
+  {
+    "_id": "60d21b4667d0d8992e610c06",
+    "text": "How important is code quality in your development process?",
+    "kind": "ordinal",
+    "responses": [
+      "Not important",
+      "Slightly important",
+      "Moderately important",
+      "Very important",
+      "Critically important"
+    ]
+  },
+  {
+    "_id": "60d21b4667d0d8992e610c07",
+    "text": "Which testing framework do you prefer?",
+    "kind": "nominal",
+    "responses": [
+      "Jest",
+      "Mocha",
+      "Vitest",
+      "Jasmine",
+      "Cypress"
+    ]
+  }
+]

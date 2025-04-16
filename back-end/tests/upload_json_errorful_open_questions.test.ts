@@ -19,6 +19,30 @@ describe("Errorful OpenQuestions JSON Upload Tests", () => {
     "../samples/errorful_open_questions.json"
   );
 
+  // Helper functions to find specific test cases in the sample data
+  const findItemWithoutId = () => errorfulData.find((item) => !item._id);
+  
+  const findItemWithWrongKind = () =>
+    errorfulData.find((item) => item.wrongKind && !item.kind);
+  
+  const findItemWithMissingKind = () =>
+    errorfulData.find((item) => !item.wrongKind && !item.kind && item.text && item.responses);
+  
+  const findItemWithMissingResponses = () =>
+    errorfulData.find((item) => item.kind && item.text && !item.responses);
+  
+  const findItemWithEmptyResponses = () =>
+    errorfulData.find((item) => item.responses && Array.isArray(item.responses) && item.responses.length === 0);
+  
+  const findItemWithOneResponse = () =>
+    errorfulData.find((item) => item.responses && Array.isArray(item.responses) && item.responses.length === 1);
+  
+  const findItemWithTwoResponses = () =>
+    errorfulData.find((item) => item.responses && Array.isArray(item.responses) && item.responses.length === 2);
+  
+  const findItemWithExtraField = () =>
+    errorfulData.find((item) => item.extraField !== undefined);
+
   beforeAll(async () => {
     // Connect to test database
     db = await setupTestDB(testDBname);
@@ -49,8 +73,9 @@ describe("Errorful OpenQuestions JSON Upload Tests", () => {
   };
 
   it("should successfully load an item without an ID", async () => {
-    // Find the item without an ID (first item in our JSON)
-    const itemWithoutId = errorfulData[0];
+    // Find the item without an ID
+    const itemWithoutId = findItemWithoutId();
+    expect(itemWithoutId).toBeDefined();
     expect(itemWithoutId._id).toBeUndefined();
 
     // Create JSON file content with just this item
@@ -89,8 +114,9 @@ describe("Errorful OpenQuestions JSON Upload Tests", () => {
   });
 
   it("should reject an item with a wrong kind field", async () => {
-    // Find item with wrong kind field (second item)
-    const itemWithWrongKind = errorfulData[1];
+    // Find item with wrong kind field
+    const itemWithWrongKind = findItemWithWrongKind();
+    expect(itemWithWrongKind).toBeDefined();
     expect(itemWithWrongKind.wrongKind).toBeDefined();
     expect(itemWithWrongKind.kind).toBeUndefined();
 
@@ -114,8 +140,9 @@ describe("Errorful OpenQuestions JSON Upload Tests", () => {
   });
 
   it("should reject an item with a missing kind field", async () => {
-    // Find item with missing kind field (third item)
-    const itemWithMissingKind = errorfulData[2];
+    // Find item with missing kind field
+    const itemWithMissingKind = findItemWithMissingKind();
+    expect(itemWithMissingKind).toBeDefined();
     expect(itemWithMissingKind.kind).toBeUndefined();
 
     // Create JSON file content with just this item
@@ -138,8 +165,9 @@ describe("Errorful OpenQuestions JSON Upload Tests", () => {
   });
 
   it("should reject an item with a missing responses field", async () => {
-    // Find item with missing responses field (fourth item)
-    const itemWithMissingResponses = errorfulData[3];
+    // Find item with missing responses field
+    const itemWithMissingResponses = findItemWithMissingResponses();
+    expect(itemWithMissingResponses).toBeDefined();
     expect(itemWithMissingResponses.responses).toBeUndefined();
 
     // Create JSON file content with just this item
@@ -166,8 +194,9 @@ describe("Errorful OpenQuestions JSON Upload Tests", () => {
   });
 
   it("should reject an item with an empty responses array", async () => {
-    // Find item with empty responses array (fifth item)
-    const itemWithEmptyResponses = errorfulData[4];
+    // Find item with empty responses array
+    const itemWithEmptyResponses = findItemWithEmptyResponses();
+    expect(itemWithEmptyResponses).toBeDefined();
     expect(itemWithEmptyResponses.responses).toEqual([]);
 
     // Create JSON file content with just this item
@@ -194,8 +223,9 @@ describe("Errorful OpenQuestions JSON Upload Tests", () => {
   });
 
   it("should reject an item with only one response", async () => {
-    // Find item with only one response (sixth item)
-    const itemWithOneResponse = errorfulData[5];
+    // Find item with only one response
+    const itemWithOneResponse = findItemWithOneResponse();
+    expect(itemWithOneResponse).toBeDefined();
     expect(itemWithOneResponse.responses.length).toBe(1);
 
     // Create JSON file content with just this item
@@ -218,8 +248,9 @@ describe("Errorful OpenQuestions JSON Upload Tests", () => {
   });
 
   it("should reject an item with exactly two responses", async () => {
-    // Find item with two responses (seventh item)
-    const itemWithTwoResponses = errorfulData[6];
+    // Find item with two responses
+    const itemWithTwoResponses = findItemWithTwoResponses();
+    expect(itemWithTwoResponses).toBeDefined();
     expect(itemWithTwoResponses.responses.length).toBe(2);
 
     // Create JSON file content with just this item
@@ -243,8 +274,9 @@ describe("Errorful OpenQuestions JSON Upload Tests", () => {
   });
 
   it("should reject an item with extra fields", async () => {
-    // Find item with extra field (eighth item)
-    const itemWithExtraField = errorfulData[7];
+    // Find item with extra field
+    const itemWithExtraField = findItemWithExtraField();
+    expect(itemWithExtraField).toBeDefined();
     expect(itemWithExtraField.extraField).toBeDefined();
 
     // Create JSON file content with just this item

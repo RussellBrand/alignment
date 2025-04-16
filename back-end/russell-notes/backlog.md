@@ -4,8 +4,11 @@
 ## [ ] merge -> master
 
 ## [ ] work tree
-git worktree add <path-to-new-directory> <branch-name>
-git worktree add ../branch2 branch2
+git checkout master
+get merge failed-auth-branch
+git br
+git worktree add ../ws-directory ws-branch
+
 ## [ ] set up all the schemas
 
 ## [ ] star windsurf working on front end

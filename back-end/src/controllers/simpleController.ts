@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import { Model, Document } from "mongoose";
-import { z } from "zod";
+import { z, ZodObject, ZodRawShape } from "zod";
 import { promises as fs } from "fs";
 import { parse } from "csv-parse/sync";
 import multer from "multer";
@@ -305,7 +305,7 @@ const readMany =
 
 // Generate a form for creating a new document
 const newForm =
-  <T extends Document>(Model: Model<T>, schema: z.ZodType) =>
+  <T extends Document>(Model: Model<T>, schema: ZodObject<ZodRawShape>) =>
   async (_req: Request, res: Response) => {
     try {
       const modelName = Model.modelName;
@@ -385,7 +385,7 @@ const newForm =
 
 // Create a new document from form submission
 const create =
-  <T extends Document>(Model: Model<T>, schema: z.ZodType) =>
+  <T extends Document>(Model: Model<T>, schema: ZodObject<ZodRawShape>) =>
   async (req: Request, res: Response) => {
     try {
       const modelName = Model.modelName;
@@ -394,7 +394,7 @@ const create =
       const processedData: Record<string, any> = { ...req.body };
 
       // Extract field information from the Zod schema to detect array fields
-      const shape = (schema as any)._def.shape();
+      const shape = schema._def.shape();
 
       // Process each field based on schema type
       Object.entries(shape).forEach(([key, value]) => {
@@ -474,7 +474,7 @@ const create =
 
 // Display form to edit an existing document
 const editForm =
-  <T extends Document>(Model: Model<T>, schema: z.ZodType) =>
+  <T extends Document>(Model: Model<T>, schema: ZodObject<ZodRawShape>) =>
   async (req: Request, res: Response) => {
     try {
       const modelName = Model.modelName;
@@ -493,7 +493,7 @@ const editForm =
       }
 
       // Extract field information from the Zod schema
-      const shape = (schema as any)._def.shape();
+      const shape = schema._def.shape();
 
       // Generate form fields with current values
       let formFields = "";
@@ -597,7 +597,7 @@ const editForm =
 
 // Update an existing document from form submission
 const update =
-  <T extends Document>(Model: Model<T>, schema: z.ZodType) =>
+  <T extends Document>(Model: Model<T>, schema: ZodObject<ZodRawShape>) =>
   async (req: Request, res: Response) => {
     try {
       const modelName = Model.modelName;
@@ -620,7 +620,7 @@ const update =
       const processedData: Record<string, any> = { ...req.body };
 
       // Extract field information from the Zod schema to detect array fields
-      const shape = (schema as any)._def.shape();
+      const shape = schema._def.shape();
 
       // Process each field based on schema type
       Object.entries(shape).forEach(([key, value]) => {
@@ -660,7 +660,7 @@ const update =
       // Create a modified schema that makes all fields optional for partial updates
       const updateSchema = z.object(
         Object.fromEntries(
-          Object.entries((schema as any)._def.shape()).map(([key, value]) => [
+          Object.entries(schema._def.shape()).map(([key, value]) => [
             key,
             (value as z.ZodType).optional(),
           ])
@@ -882,7 +882,7 @@ const csvUploadForm =
 
 // Process CSV upload
 const processCSV =
-  <T extends Document>(Model: Model<T>, schema: z.ZodType) =>
+  <T extends Document>(Model: Model<T>, schema: ZodObject<ZodRawShape>) =>
   async (req: RequestWithFile, res: Response) => {
     try {
       const modelName = Model.modelName;
@@ -919,7 +919,7 @@ const processCSV =
         }
 
         // Extract field information from the Zod schema to detect array fields
-        const shape = (schema as any)._def.shape();
+        const shape = schema._def.shape();
 
         // Process each field based on schema type
         Object.entries(shape).forEach(([key, value]) => {
@@ -1041,7 +1041,7 @@ const jsonUploadForm =
 
 // Process JSON upload
 const processJSON =
-  <T extends Document>(Model: Model<T>, schema: z.ZodType) =>
+  <T extends Document>(Model: Model<T>, schema: ZodObject<ZodRawShape>) =>
   async (req: RequestWithFile, res: Response) => {
     try {
       const modelName = Model.modelName;

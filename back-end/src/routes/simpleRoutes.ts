@@ -1,7 +1,7 @@
 import express, { Router } from "express";
 import { Model, Document } from "mongoose";
 import simpleController, { upload } from "../controllers/simpleController";
-import { z } from "zod";
+import { z, ZodObject, ZodRawShape } from "zod";
 import { OpenQuestion } from "../schemas/openQuestionSchema";
 import { Question } from "../schemas/questionSchema";
 import { openQuestionSchema } from "../schemas/openQuestionSchema";
@@ -24,7 +24,7 @@ export const simpleDashboardRouter = express.Router();
 // Create routes for a specific model
 const createSimpleRoutes = <T extends Document>(
   Model: Model<T>,
-  schema: z.ZodType = z.object({}) // Default empty schema as fallback
+  schema: ZodObject<ZodRawShape> = z.object({}) // Fixed: Use ZodObject<ZodRawShape> instead of z.ZodType
 ): Router => {
   const router = express.Router();
 

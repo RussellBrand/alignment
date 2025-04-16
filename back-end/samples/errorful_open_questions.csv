@@ -1,0 +1,9 @@
+text,kind,responses
+What is your favorite cloud platform?,nominal,AWS;Azure;GCP;DigitalOcean;Heroku
+How many years of programming experience do you have?,,0-1;2-5;6-10;10+
+Which IDE do you prefer?,,VS Code;IntelliJ;Sublime Text;Vim
+How often do you write tests?,ordinal,
+How often do you deploy?,ordinal,
+Do you use Git?,nominal,Yes
+How often do you refactor code?,ordinal,Rarely;Sometimes
+Which OS do you use for development?,nominal,Windows;macOS;Linux;Other

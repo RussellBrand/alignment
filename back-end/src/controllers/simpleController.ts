@@ -903,13 +903,64 @@ const processCSV =
         trim: true,
       });
 
-      // Validate each record
+      // Process and validate each record
       const validRecords = [];
       const errors = [];
 
       for (let i = 0; i < records.length; i++) {
         const record = records[i];
-        const validationResult = schema.safeParse(record);
+
+        // Process the record data (similar to create function)
+        const processedRecord: Record<string, any> = { ...record };
+
+        // Handle empty ID fields - remove them so MongoDB can generate an ID
+        if (processedRecord._id === "" || processedRecord._id === undefined) {
+          delete processedRecord._id;
+        }
+
+        // Extract field information from the Zod schema to detect array fields
+        const shape = (schema as any)._def.shape();
+
+        // Process each field based on schema type
+        Object.entries(shape).forEach(([key, value]) => {
+          if (processedRecord[key]) {
+            // Process arrays - convert string (semicolon or comma separated) to array
+            if (
+              value._def &&
+              value._def.typeName === "ZodArray" &&
+              typeof processedRecord[key] === "string"
+            ) {
+              // Check for both semicolon and comma separators
+              const separator = processedRecord[key].includes(";") ? ";" : ",";
+
+              // Split by separator and trim whitespace
+              const items = processedRecord[key]
+                .split(separator)
+                .map((item: string) => item.trim());
+
+              // Filter out empty items
+              processedRecord[key] = items.filter(
+                (item: string) => item.length > 0
+              );
+            }
+
+            // Try to parse JSON if the field is provided as JSON string
+            if (
+              typeof processedRecord[key] === "string" &&
+              (processedRecord[key].startsWith("[") ||
+                processedRecord[key].startsWith("{"))
+            ) {
+              try {
+                processedRecord[key] = JSON.parse(processedRecord[key]);
+              } catch (e) {
+                // If parsing fails, keep the original string
+              }
+            }
+          }
+        });
+
+        // Validate the processed record
+        const validationResult = schema.safeParse(processedRecord);
 
         if (validationResult.success) {
           validRecords.push(validationResult.data);

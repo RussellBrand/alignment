@@ -47,7 +47,7 @@ describe("Sample OpenQuestions CSV Upload", () => {
 
   afterAll(async () => {
     // Clean up test database connection
-    // await teardownTestDB();
+    await teardownTestDB();
   });
 
   it("should upload sample OpenQuestions data from CSV to database", async () => {
@@ -92,14 +92,8 @@ describe("Sample OpenQuestions CSV Upload", () => {
   });
 
   it("should verify each specific question was uploaded correctly", async () => {
-    // Select a few sample questions to verify in detail
-    // We'll pick the first, fourth and fifth records (if available)
-    const samplesToCheck = Math.min(sampleData.length, 5);
-    const sampleQuestionIds = [];
-
-    if (sampleData.length > 0) sampleQuestionIds.push(sampleData[0]._id);
-    if (sampleData.length > 3) sampleQuestionIds.push(sampleData[3]._id);
-    if (sampleData.length > 4) sampleQuestionIds.push(sampleData[4]._id);
+    // Verify all questions in detail instead of sampling
+    const sampleQuestionIds = sampleData.map((question) => question._id);
 
     for (const questionId of sampleQuestionIds) {
       // Find the question in the original sample data

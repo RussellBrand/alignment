@@ -1,16 +1,19 @@
 {
   "compilerOptions": {
-    "types": ["vitest"],
-    "typeRoots": ["./node_modules/@types", "./src/types"],
+    "typeRoots": [
+      "./node_modules/@types",
+      "./node_modules/vitest/dist/index.d.ts",
+      "./src/types"
+    ],
     "target": "ES2020",
     "module": "CommonJS",
     "outDir": "dist",
-    "rootDir": "src",
+    "rootDir": ".",
     "strict": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true
   },
-  "include": ["src/**/*"],
+  "include": ["src/**/*", "tests/**/*", "node_modules/vitest/dist/index.d.ts"],
   "exclude": ["node_modules", "dist"]
 }

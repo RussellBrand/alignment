@@ -1,7 +1,7 @@
 [
   {
     "_id": "60d21b4667d0d8992e610c01",
-    "text": "What is your preferred programming language?",
+    "text": "WHAT IS YOUR PREFERRED PROGRAMMING LANGUAGE?",
     "kind": "nominal",
     "responses": [
       "JavaScript",
@@ -13,7 +13,7 @@
   },
   {
     "_id": "60d21b4667d0d8992e610c02",
-    "text": "How would you rate your experience with Express.js?",
+    "text": "HOW WOULD YOU RATE YOUR EXPERIENCE WITH EXPRESS.JS?",
     "kind": "ordinal",
     "responses": [
       "Beginner",
@@ -24,7 +24,7 @@
   },
   {
     "_id": "60d21b4667d0d8992e610c03",
-    "text": "Which front-end framework do you use most often?",
+    "text": "WHICH FRONT-END FRAMEWORK DO YOU USE MOST OFTEN?",
     "kind": "nominal",
     "responses": [
       "React",
@@ -35,7 +35,7 @@
   },
   {
     "_id": "60d21b4667d0d8992e610c04",
-    "text": "How satisfied are you with your current development environment?",
+    "text": "HOW SATISFIED ARE YOU WITH YOUR CURRENT DEVELOPMENT ENVIRONMENT?",
     "kind": "ordinal",
     "responses": [
       "Very dissatisfied",
@@ -47,7 +47,7 @@
   },
   {
     "_id": "60d21b4667d0d8992e610c05",
-    "text": "Which database technology do you prefer?",
+    "text": "WHICH DATABASE TECHNOLOGY DO YOU PREFER?",
     "kind": "nominal",
     "responses": [
       "MongoDB",
@@ -59,7 +59,7 @@
   },
   {
     "_id": "60d21b4667d0d8992e610c06",
-    "text": "How important is code quality in your development process?",
+    "text": "HOW IMPORTANT IS CODE QUALITY IN YOUR DEVELOPMENT PROCESS?",
     "kind": "ordinal",
     "responses": [
       "Not important",

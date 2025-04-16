@@ -47,7 +47,7 @@ describe("Sample OpenQuestions CSV Upload", () => {
 
   afterAll(async () => {
     // Clean up test database connection
-    await teardownTestDB();
+    // await teardownTestDB();
   });
 
   it("should upload sample OpenQuestions data from CSV to database", async () => {

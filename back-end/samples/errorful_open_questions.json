@@ -1,0 +1,48 @@
+[
+  {
+    "text": "What is your favorite cloud platform?",
+    "kind": "nominal",
+    "responses": ["AWS", "Azure", "GCP", "DigitalOcean", "Heroku"]
+  },
+  {
+    "_id": "70d21b4667d0d8992e610c10",
+    "text": "How many years of programming experience do you have?",
+    "wrongKind": "ordinal",
+    "responses": ["0-1", "2-5", "6-10", "10+"]
+  },
+  {
+    "_id": "70d21b4667d0d8992e610c11",
+    "text": "Which IDE do you prefer?",
+    "responses": ["VS Code", "IntelliJ", "Sublime Text", "Vim"]
+  },
+  {
+    "_id": "70d21b4667d0d8992e610c12",
+    "text": "How often do you write tests?",
+    "kind": "ordinal"
+  },
+  {
+    "_id": "70d21b4667d0d8992e610c13",
+    "text": "How often do you deploy?",
+    "kind": "ordinal",
+    "responses": []
+  },
+  {
+    "_id": "70d21b4667d0d8992e610c14",
+    "text": "Do you use Git?",
+    "kind": "nominal",
+    "responses": ["Yes"]
+  },
+  {
+    "_id": "70d21b4667d0d8992e610c15",
+    "text": "How often do you refactor code?",
+    "kind": "ordinal",
+    "responses": ["Rarely", "Sometimes"]
+  },
+  {
+    "_id": "70d21b4667d0d8992e610c16",
+    "text": "Which OS do you use for development?",
+    "kind": "nominal",
+    "responses": ["Windows", "macOS", "Linux", "Other"],
+    "extraField": "This is an extra field that shouldn't be here"
+  }
+]

@@ -178,3 +178,42 @@ to the `open_questions` collection and verifies that it was uploaded properly.
 7. make test for downloading the csv file
 8. implement code to pass the test
 9. run the test to verify that it passed
+
+## clear mongodb
+## [ ] see if the upload stuff actually does work
+## [ ] all questions rather than just 3
+
+## [ ] fix source tree
+## [ ] other schema
+answered_questions with the ONLY IF field for reflexive
+## [ ] simple form verios of text
+## [ ] upload csv error handling 
+## [ ] upload json error handling 
+
+make a testing file for uploading json open questions:
+
+
+make a test data in a fie `errorful_open_questions.json`
+
+for uploading json open questions that demonstrates the following cases
+
+add a test that shows that a item without an ID loads successful
+
+add a test that shows that a item without an ID loads successful
+
+
+add a test that shows with a wrong kind cannot be added
+
+add a test that shows with a missing kind cannot be added
+
+add a test that shows with a responses field cannot be added
+
+add a test that shows with a responses field containing no items cannot be added
+
+
+add a test that shows with a responses field containing only one items cannot be added
+
+add a test that shows with a responses field containing only two items cannot be added
+
+add a test that shows with an extra field cannot be added
+

@@ -28,10 +28,11 @@ export function computeDBname(fileName: string): string {
   // Replace any non-alphanumeric characters with underscores to avoid MongoDB name restrictions
   const sanitizedName = baseName.replace(/[^a-zA-Z0-9]/g, "_");
   // Add timestamp to ensure uniqueness
-  const timestamp = new Date().getTime();
+  // const timestamp = new Date().getTime();
   // preventing the name from getting longe than 64 characters downstream
   // TODO: fix this
-  return `test_${sanitizedName}_${timestamp}`.slice(-40);
+  // return `test_${sanitizedName}_${timestamp}`.slice(-40);
+  return `test_${sanitizedName}`.slice(-40);
 }
 
 /**

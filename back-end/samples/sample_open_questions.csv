@@ -1,8 +1,8 @@
 _id,text,kind,responses
-60d21b4667d0d8992e610c01,"What is your preferred programming language?",nominal,"JavaScript,Python,TypeScript,Java,C#"
-60d21b4667d0d8992e610c02,"How would you rate your experience with Express.js?",ordinal,"Beginner,Intermediate,Advanced,Expert"
-60d21b4667d0d8992e610c03,"Which front-end framework do you use most often?",nominal,"React,Vue,Angular,Svelte"
-60d21b4667d0d8992e610c04,"How satisfied are you with your current development environment?",ordinal,"Very dissatisfied,Somewhat dissatisfied,Neutral,Somewhat satisfied,Very satisfied"
-60d21b4667d0d8992e610c05,"Which database technology do you prefer?",nominal,"MongoDB,PostgreSQL,MySQL,SQLite,Redis"
-60d21b4667d0d8992e610c06,"How important is code quality in your development process?",ordinal,"Not important,Slightly important,Moderately important,Very important,Critically important"
-60d21b4667d0d8992e610c07,"Which testing framework do you prefer?",nominal,"Jest,Mocha,Vitest,Jasmine,Cypress"
+60d21b4667d0d8992e610c01,What is your preferred programming language?,nominal,JavaScript;Python;TypeScript;Java;C#
+60d21b4667d0d8992e610c02,How would you rate your experience with Express.js?,ordinal,Beginner;Intermediate;Advanced;Expert
+60d21b4667d0d8992e610c03,Which front-end framework do you use most often?,nominal,React;Vue;Angular;Svelte
+60d21b4667d0d8992e610c04,How satisfied are you with your current development environment?,ordinal,Very dissatisfied;Somewhat dissatisfied;Neutral;Somewhat satisfied;Very satisfied
+60d21b4667d0d8992e610c05,Which database technology do you prefer?,nominal,MongoDB;PostgreSQL;MySQL;SQLite;Redis
+60d21b4667d0d8992e610c06,How important is code quality in your development process?,ordinal,Not important;Slightly important;Moderately important;Very important;Critically important
+60d21b4667d0d8992e610c07,Which testing framework do you prefer?,nominal,Jest;Mocha;Vitest;Jasmine;Cypress

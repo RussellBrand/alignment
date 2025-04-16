@@ -128,4 +128,33 @@ filename, modelnames, types, routes, schema, interfaces, tables, tests, etc.
 Give me a list of things that should be changed
 
 	
-	
+## [ ] schema
+
+extend the `openQuestionSchema` to also have
+
+* kind: "nominal" | "ordinal" | "reflex-nom" | "reflex-ord" 
+
+* response: string[]
+
+with constraints
+
+* the list of responses must have at least two items
+
+* the responses cannot be repeated within an area
+
+* each of the responses must not have leading or trailing whitespace
+
+* each of the reponses must be non-blank
+
+update the tests, controllers, routes, etc.
+
+rerun the tests
+
+
+## [ ] samples
+
+make a sample seven set of OpenQuestions as an array in json format in the file
+
+back-end/samples/sample.open_questions.json
+
+include ID's 

@@ -9,6 +9,13 @@ extendZod(z);
 export const openQuestionSchema = z
   .object({
     text: z.string(),
+    kind: z.enum(["nominal", "ordinal", "reflex-nom", "reflex-ord"]),
+    responses: z
+      .array(z.string().trim().min(1))
+      .min(2, "At least two responses are required")
+      .refine((items) => new Set(items).size === items.length, {
+        message: "Responses must be unique",
+      }),
   })
   .strict();
 

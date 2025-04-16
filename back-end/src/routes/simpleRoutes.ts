@@ -2,6 +2,24 @@ import express, { Router } from "express";
 import { Model, Document } from "mongoose";
 import simpleController, { upload } from "../controllers/simpleController";
 import { z } from "zod";
+import { OpenQuestion } from "../schemas/openQuestionSchema";
+import { Question } from "../schemas/questionSchema";
+import { openQuestionSchema } from "../schemas/openQuestionSchema";
+import { questionSchema } from "../schemas/questionSchema";
+import { User } from "../schemas/userSchema";
+import { userSchema } from "../schemas/userSchema";
+import { Quote } from "../schemas/quoteSchema";
+import { quoteSchema } from "../schemas/quoteSchema";
+import { Whence } from "../schemas/whenceSchema";
+import { whenceSchema } from "../schemas/whenceSchema";
+
+// Create separate routers for each model with their own prefixes
+export const simpleOpenQuestionRouter = express.Router();
+export const simpleQuestionRouter = express.Router();
+export const simpleUserRouter = express.Router();
+export const simpleQuoteRouter = express.Router();
+export const simpleWhenceRouter = express.Router();
+export const simpleDashboardRouter = express.Router();
 
 // Create routes for a specific model
 const createSimpleRoutes = <T extends Document>(
@@ -25,7 +43,7 @@ const createSimpleRoutes = <T extends Document>(
   );
 
   // Edit and update routes
-  router.get("/edit/:id", simpleController.editForm(Model));
+  router.get("/edit/:id", simpleController.editForm(Model, schema));
   router.post(
     "/update/:id",
     express.urlencoded({ extended: true }),

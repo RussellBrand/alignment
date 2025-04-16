@@ -10,6 +10,27 @@ const testDBname = computeDBname(__filename);
 // Sample question data
 const testOpenQuestion = {
   text: "What is the meaning of life?",
+  kind: "nominal",
+  responses: ["Love", "42", "Chocolate"],
+};
+
+// Additional test questions with different kinds and responses
+const ordinalQuestion = {
+  text: "How satisfied are you?",
+  kind: "ordinal",
+  responses: [
+    "Very dissatisfied",
+    "Somewhat dissatisfied",
+    "Neutral",
+    "Somewhat satisfied",
+    "Very satisfied",
+  ],
+};
+
+const reflexQuestion = {
+  text: "How do you feel about your decision?",
+  kind: "reflex-nom",
+  responses: ["Happy", "Confused", "Regretful"],
 };
 
 describe("OpenQuestion Routes", () => {
@@ -39,11 +60,15 @@ describe("OpenQuestion Routes", () => {
       expect(response.status).toBe(201);
       expect(response.body).toHaveProperty("_id");
       expect(response.body.text).toBe(testOpenQuestion.text);
+      expect(response.body.kind).toBe(testOpenQuestion.kind);
+      expect(response.body.responses).toEqual(testOpenQuestion.responses);
     });
 
     it("should reject open question with excess attributes", async () => {
       const questionWithExcessAttributes = {
         text: "Valid question text",
+        kind: "nominal",
+        responses: ["Option 1", "Option 2"],
         excessAttribute: "This attribute should be stripped or rejected",
       };
 
@@ -89,6 +114,8 @@ describe("OpenQuestion Routes", () => {
       expect(response.status).toBe(200);
       expect(response.body._id).toBe(questionId);
       expect(response.body.text).toBe(testOpenQuestion.text);
+      expect(response.body.kind).toBe(testOpenQuestion.kind);
+      expect(response.body.responses).toEqual(testOpenQuestion.responses);
     });
   });
 
@@ -110,6 +137,8 @@ describe("OpenQuestion Routes", () => {
 
       expect(response.status).toBe(200);
       expect(response.body.text).toBe(updatedData.text);
+      expect(response.body.kind).toBe(updatedData.kind);
+      expect(response.body.responses).toEqual(updatedData.responses);
     });
 
     it("should update an open question if the ID is not included in the payload", async () => {
@@ -119,7 +148,11 @@ describe("OpenQuestion Routes", () => {
         .send(testOpenQuestion);
 
       const questionId = createResponse.body._id;
-      const updatedData = { text: "Updated without including ID" };
+      const updatedData = {
+        text: "Updated without including ID",
+        kind: "nominal",
+        responses: ["Option 1", "Option 2"],
+      };
 
       // Update without including the _id in the payload
       const response = await request(app)
@@ -140,6 +173,8 @@ describe("OpenQuestion Routes", () => {
       const updatedData = {
         _id: questionId,
         text: "Updated with matching ID",
+        kind: "ordinal",
+        responses: ["Option A", "Option B"],
       };
 
       // Update with matching IDs
@@ -160,7 +195,11 @@ describe("OpenQuestion Routes", () => {
       // Create another question to get a different ID
       const anotherResponse = await request(app)
         .post("/api/open-questions")
-        .send({ text: "Another question" });
+        .send({
+          text: "Another question",
+          kind: "nominal",
+          responses: ["Option 1", "Option 2"],
+        });
 
       const questionId = createResponse.body._id;
       const anotherQuestionId = anotherResponse.body._id;
@@ -169,6 +208,8 @@ describe("OpenQuestion Routes", () => {
       const updatedData = {
         _id: anotherQuestionId, // Deliberately using a different ID
         text: "This update should fail",
+        kind: "ordinal",
+        responses: ["Option X", "Option Y"],
       };
 
       const response = await request(app)
@@ -210,13 +251,25 @@ describe("OpenQuestion Routes", () => {
       // Create multiple questions
       await request(app)
         .post("/api/open-questions")
-        .send({ text: "Question 1" });
+        .send({
+          text: "Question 1",
+          kind: "nominal",
+          responses: ["Option 1", "Option 2"],
+        });
       await request(app)
         .post("/api/open-questions")
-        .send({ text: "Question 2" });
+        .send({
+          text: "Question 2",
+          kind: "ordinal",
+          responses: ["Option 1", "Option 2", "Option 3"],
+        });
       await request(app)
         .post("/api/open-questions")
-        .send({ text: "Question 3" });
+        .send({
+          text: "Question 3",
+          kind: "reflex-nom",
+          responses: ["Option 1"],
+        });
 
       // Verify questions exist
       const beforeDelete = await request(app).get("/api/open-questions");
@@ -270,21 +323,35 @@ describe("OpenQuestion Routes", () => {
       expect(response.body.length).toBe(1);
       expect(response.body[0]._id).toBe(questionId);
       expect(response.body[0].text).toBe(testOpenQuestion.text);
+      expect(response.body[0].kind).toBe(testOpenQuestion.kind);
+      expect(response.body[0].responses).toEqual(testOpenQuestion.responses);
     });
 
     it("should retrieve multiple open questions with multiple IDs", async () => {
       // Create three questions
       const question1 = await request(app)
         .post("/api/open-questions")
-        .send({ text: "First question" });
+        .send({
+          text: "First question",
+          kind: "nominal",
+          responses: ["Option 1", "Option 2"],
+        });
 
       const question2 = await request(app)
         .post("/api/open-questions")
-        .send({ text: "Second question" });
+        .send({
+          text: "Second question",
+          kind: "ordinal",
+          responses: ["Option 1", "Option 2", "Option 3"],
+        });
 
       const question3 = await request(app)
         .post("/api/open-questions")
-        .send({ text: "Third question" });
+        .send({
+          text: "Third question",
+          kind: "reflex-nom",
+          responses: ["Option A", "Option B"],
+        });
 
       const ids = [question1.body._id, question2.body._id, question3.body._id];
 
@@ -343,9 +410,17 @@ describe("OpenQuestion Routes", () => {
   describe("POST /api/open-questions/create/many", () => {
     it("should create multiple new open questions without IDs", async () => {
       const questions = [
-        { text: "Question 1" },
-        { text: "Question 2" },
-        { text: "Question 3" },
+        {
+          text: "Question 1",
+          kind: "nominal",
+          responses: ["Option 1", "Option 2"],
+        },
+        {
+          text: "Question 2",
+          kind: "ordinal",
+          responses: ["Option 1", "Option 2", "Option 3"],
+        },
+        { text: "Question 3", kind: "reflex-nom", responses: ["Option 1"] },
       ];
 
       const response = await request(app)
@@ -372,15 +447,28 @@ describe("OpenQuestion Routes", () => {
       // First create a question
       const existingQuestion = await request(app)
         .post("/api/open-questions")
-        .send({ text: "Existing question" });
+        .send({
+          text: "Existing question",
+          kind: "nominal",
+          responses: ["Option 1", "Option 2"],
+        });
 
       const existingId = existingQuestion.body._id;
 
       // Mix of existing and new questions
       const questions = [
-        { _id: existingId, text: "Updated existing question" },
-        { text: "New question 1" },
-        { text: "New question 2" },
+        {
+          _id: existingId,
+          text: "Updated existing question",
+          kind: "nominal",
+          responses: ["Option 1", "Option 2"],
+        },
+        {
+          text: "New question 1",
+          kind: "ordinal",
+          responses: ["Option 1", "Option 2", "Option 3"],
+        },
+        { text: "New question 2", kind: "reflex-nom", responses: ["Option 1"] },
       ];
 
       const response = await request(app)
@@ -454,7 +542,11 @@ describe("OpenQuestion Routes", () => {
 
       const anotherResponse = await request(app)
         .post("/api/open-questions")
-        .send({ text: "Another question" });
+        .send({
+          text: "Another question",
+          kind: "nominal",
+          responses: ["Option 1", "Option 2"],
+        });
 
       const questionId = createResponse.body._id;
       const anotherQuestionId = anotherResponse.body._id;

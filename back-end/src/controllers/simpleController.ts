@@ -129,10 +129,18 @@ const readAll =
       const content = `
       <p>Total: ${documents.length} ${modelName}(s)</p>
       <div class="back-link">
-        <a href="/simple/${modelNameToRouteComponent(modelName)}/new">Add New ${modelName}</a> | 
-        <a href="/simple/${modelNameToRouteComponent(modelName)}/upload-csv">Upload CSV</a> | 
-        <a href="/simple/${modelNameToRouteComponent(modelName)}/upload-json">Upload JSON</a> |
-        <a href="/simple/${modelNameToRouteComponent(modelName)}/deleteAll">Delete All</a>
+        <a href="/simple/${modelNameToRouteComponent(
+          modelName
+        )}/new">Add New ${modelName}</a> | 
+        <a href="/simple/${modelNameToRouteComponent(
+          modelName
+        )}/upload-csv">Upload CSV</a> | 
+        <a href="/simple/${modelNameToRouteComponent(
+          modelName
+        )}/upload-json">Upload JSON</a> |
+        <a href="/simple/${modelNameToRouteComponent(
+          modelName
+        )}/deleteAll">Delete All</a>
       </div>
       ${documentsHtml}
       <pre>${JSON.stringify(documents, null, 2)}</pre>
@@ -311,18 +319,50 @@ const newForm =
         // Skip internal fields
         if (key === "_id" || key === "__v") return;
 
-        // Determine field type
-        let inputType = "text";
-        if (key === "email") inputType = "email";
+        // Determine field type and special handling
+        let fieldHtml = "";
 
-        formFields += `
-          <div>
+        // Check if it's an enum
+        if (value._def && value._def.typeName === "ZodEnum") {
+          // Handle enum fields with a select dropdown
+          const options = value._def.values
+            .map((opt: string) => `<option value="${opt}">${opt}</option>`)
+            .join("");
+
+          fieldHtml = `
             <label for="${key}">${
-          key.charAt(0).toUpperCase() + key.slice(1)
-        }:</label>
+            key.charAt(0).toUpperCase() + key.slice(1)
+          }:</label>
+            <select id="${key}" name="${key}" required>
+              ${options}
+            </select>
+          `;
+        }
+        // Check if it's an array
+        else if (value._def && value._def.typeName === "ZodArray") {
+          fieldHtml = `
+            <label for="${key}">${
+            key.charAt(0).toUpperCase() + key.slice(1)
+          } (comma-separated):</label>
+            <textarea id="${key}" name="${key}" rows="4" required
+              placeholder="Enter items separated by commas"></textarea>
+            <small>Enter multiple values separated by commas. Will be stored as an array.</small>
+          `;
+        }
+        // Default handling for other fields
+        else {
+          let inputType = "text";
+          if (key === "email") inputType = "email";
+
+          fieldHtml = `
+            <label for="${key}">${
+            key.charAt(0).toUpperCase() + key.slice(1)
+          }:</label>
             <input type="${inputType}" id="${key}" name="${key}" required>
-          </div>
-        `;
+          `;
+        }
+
+        formFields += `<div>${fieldHtml}</div>`;
       });
 
       const content = `
@@ -350,8 +390,49 @@ const create =
     try {
       const modelName = Model.modelName;
 
-      // Parse and validate input using Zod schema
-      const validationResult = schema.safeParse(req.body);
+      // Need to process the form data before validation
+      const processedData: Record<string, any> = { ...req.body };
+
+      // Extract field information from the Zod schema to detect array fields
+      const shape = (schema as any)._def.shape();
+
+      // Process each field based on schema type
+      Object.entries(shape).forEach(([key, value]) => {
+        if (processedData[key]) {
+          // Process arrays - convert string (comma-separated) to array
+          if (
+            value._def &&
+            value._def.typeName === "ZodArray" &&
+            typeof processedData[key] === "string"
+          ) {
+            // Split by comma and trim whitespace
+            const items = processedData[key]
+              .split(",")
+              .map((item: string) => item.trim());
+            // Filter out empty items
+            processedData[key] = items.filter(
+              (item: string) => item.length > 0
+            );
+          }
+
+          // Try to parse JSON if the field is provided as JSON string
+          // This is useful for testing and programmatic submissions
+          if (
+            typeof processedData[key] === "string" &&
+            (processedData[key].startsWith("[") ||
+              processedData[key].startsWith("{"))
+          ) {
+            try {
+              processedData[key] = JSON.parse(processedData[key]);
+            } catch (e) {
+              // If parsing fails, keep the original string
+            }
+          }
+        }
+      });
+
+      // Parse and validate processed input using Zod schema
+      const validationResult = schema.safeParse(processedData);
 
       if (!validationResult.success) {
         // Format validation errors
@@ -369,7 +450,9 @@ const create =
             <h2>Validation Error</h2>
             ${errorMessages}
             <div class="back-link">
-              <a href="/simple/${modelNameToRouteComponent(modelName)}/new">Back to Form</a>
+              <a href="/simple/${modelNameToRouteComponent(
+                modelName
+              )}/new">Back to Form</a>
             </div>
           `
           )
@@ -391,7 +474,7 @@ const create =
 
 // Display form to edit an existing document
 const editForm =
-  <T extends Document>(Model: Model<T>) =>
+  <T extends Document>(Model: Model<T>, schema: z.ZodType) =>
   async (req: Request, res: Response) => {
     try {
       const modelName = Model.modelName;
@@ -409,26 +492,88 @@ const editForm =
           );
       }
 
+      // Extract field information from the Zod schema
+      const shape = (schema as any)._def.shape();
+
       // Generate form fields with current values
       let formFields = "";
       const docObj = document.toObject();
+
+      // Helper function to escape HTML in values
+      const escapeHtml = (str: string) => {
+        if (typeof str !== "string") return str;
+        return str
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;")
+          .replace(/'/g, "&#039;");
+      };
 
       Object.entries(docObj).forEach(([key, value]) => {
         // Skip internal Mongoose fields
         if (key === "_id" || key === "__v") return;
 
-        // Determine field type
-        let inputType = "text";
-        if (key === "email") inputType = "email";
+        // Get schema info for this field if available
+        const fieldSchema = shape[key];
+        let fieldHtml = "";
 
-        formFields += `
-          <div>
+        // Check if it's an enum
+        if (
+          fieldSchema &&
+          fieldSchema._def &&
+          fieldSchema._def.typeName === "ZodEnum"
+        ) {
+          // Handle enum fields with a select dropdown
+          const options = fieldSchema._def.values
+            .map(
+              (opt: string) =>
+                `<option value="${escapeHtml(opt)}" ${
+                  value === opt ? "selected" : ""
+                }>${escapeHtml(opt)}</option>`
+            )
+            .join("");
+
+          fieldHtml = `
             <label for="${key}">${
-          key.charAt(0).toUpperCase() + key.slice(1)
-        }:</label>
-            <input type="${inputType}" id="${key}" name="${key}" value="${value}" required>
-          </div>
-        `;
+            key.charAt(0).toUpperCase() + key.slice(1)
+          }:</label>
+            <select id="${key}" name="${key}" required>
+              ${options}
+            </select>
+          `;
+        }
+        // Check if it's an array
+        else if (Array.isArray(value)) {
+          // For arrays, show a textarea with comma-separated values
+          const textValue = Array.isArray(value) ? value.join(", ") : "";
+
+          fieldHtml = `
+            <label for="${key}">${
+            key.charAt(0).toUpperCase() + key.slice(1)
+          } (comma-separated):</label>
+            <textarea id="${key}" name="${key}" rows="4" required>${escapeHtml(
+            textValue
+          )}</textarea>
+            <small>Enter multiple values separated by commas. Will be stored as an array.</small>
+          `;
+        }
+        // Default handling for other fields
+        else {
+          let inputType = "text";
+          if (key === "email") inputType = "email";
+
+          fieldHtml = `
+            <label for="${key}">${
+            key.charAt(0).toUpperCase() + key.slice(1)
+          }:</label>
+            <input type="${inputType}" id="${key}" name="${key}" value="${escapeHtml(
+            String(value)
+          )}" required>
+          `;
+        }
+
+        formFields += `<div>${fieldHtml}</div>`;
       });
 
       const content = `
@@ -471,6 +616,46 @@ const update =
           );
       }
 
+      // Process the form data before validation
+      const processedData: Record<string, any> = { ...req.body };
+
+      // Extract field information from the Zod schema to detect array fields
+      const shape = (schema as any)._def.shape();
+
+      // Process each field based on schema type
+      Object.entries(shape).forEach(([key, value]) => {
+        if (processedData[key]) {
+          // Process arrays - convert string (comma-separated) to array
+          if (
+            value._def &&
+            value._def.typeName === "ZodArray" &&
+            typeof processedData[key] === "string"
+          ) {
+            // Split by comma and trim whitespace
+            const items = processedData[key]
+              .split(",")
+              .map((item: string) => item.trim());
+            // Filter out empty items
+            processedData[key] = items.filter(
+              (item: string) => item.length > 0
+            );
+          }
+
+          // Try to parse JSON if the field is provided as JSON string
+          if (
+            typeof processedData[key] === "string" &&
+            (processedData[key].startsWith("[") ||
+              processedData[key].startsWith("{"))
+          ) {
+            try {
+              processedData[key] = JSON.parse(processedData[key]);
+            } catch (e) {
+              // If parsing fails, keep the original string
+            }
+          }
+        }
+      });
+
       // Validate the update data
       // Create a modified schema that makes all fields optional for partial updates
       const updateSchema = z.object(
@@ -482,7 +667,7 @@ const update =
         )
       );
 
-      const validationResult = updateSchema.safeParse(req.body);
+      const validationResult = updateSchema.safeParse(processedData);
 
       if (!validationResult.success) {
         // Format validation errors
@@ -500,7 +685,9 @@ const update =
             <h2>Validation Error</h2>
             ${errorMessages}
             <div class="back-link">
-              <a href="/simple/${modelNameToRouteComponent(modelName)}/edit/${id}">Back to Edit Form</a>
+              <a href="/simple/${modelNameToRouteComponent(
+                modelName
+              )}/edit/${id}">Back to Edit Form</a>
             </div>
           `
           )
@@ -562,7 +749,9 @@ const deleteForm =
         <button type="submit" class="delete">Confirm Delete</button>
       </form>
       <div class="back-link" style="margin-top: 20px;">
-        <a href="/simple/${modelNameToRouteComponent(modelName)}/readAll">Cancel</a>
+        <a href="/simple/${modelNameToRouteComponent(
+          modelName
+        )}/readAll">Cancel</a>
       </div>
       `;
 
@@ -619,11 +808,15 @@ const deleteAllForm =
       <p>This will permanently delete all ${count} ${modelName}(s) in the database.</p>
       <p><strong>This action cannot be undone!</strong></p>
       
-      <form action="/simple/${modelNameToRouteComponent(modelName)}/deleteAll" method="POST">
+      <form action="/simple/${modelNameToRouteComponent(
+        modelName
+      )}/deleteAll" method="POST">
         <button type="submit" class="delete">Confirm Delete All</button>
       </form>
       <div class="back-link" style="margin-top: 20px;">
-        <a href="/simple/${modelNameToRouteComponent(modelName)}/readAll">Cancel</a>
+        <a href="/simple/${modelNameToRouteComponent(
+          modelName
+        )}/readAll">Cancel</a>
       </div>
       `;
 
@@ -667,7 +860,9 @@ const csvUploadForm =
       <p>Upload a CSV file to create multiple ${modelName} records at once.</p>
       <p>The first row should contain field names that match the ${modelName} fields.</p>
       
-      <form action="/simple/${modelNameToRouteComponent(modelName)}/process-csv" method="POST" enctype="multipart/form-data">
+      <form action="/simple/${modelNameToRouteComponent(
+        modelName
+      )}/process-csv" method="POST" enctype="multipart/form-data">
         <div>
           <label for="csvFile">Select CSV File:</label>
           <input type="file" id="csvFile" name="file" accept=".csv" required>
@@ -737,7 +932,9 @@ const processCSV =
             <p>${errors.length} errors found in the CSV file:</p>
             <ul>${errorList}</ul>
             <div class="back-link">
-              <a href="/simple/${modelNameToRouteComponent(modelName)}/upload-csv">Try Again</a>
+              <a href="/simple/${modelNameToRouteComponent(
+                modelName
+              )}/upload-csv">Try Again</a>
             </div>
           `
           )
@@ -771,7 +968,9 @@ const jsonUploadForm =
       <p>Upload a JSON file to create multiple ${modelName} records at once.</p>
       <p>The JSON should be an array of objects with fields that match the ${modelName} schema.</p>
       
-      <form action="/simple/${modelNameToRouteComponent(modelName)}/process-json" method="POST" enctype="multipart/form-data">
+      <form action="/simple/${modelNameToRouteComponent(
+        modelName
+      )}/process-json" method="POST" enctype="multipart/form-data">
         <div>
           <label for="jsonFile">Select JSON File:</label>
           <input type="file" id="jsonFile" name="file" accept=".json" required>
@@ -854,7 +1053,9 @@ const processJSON =
             <p>${errors.length} errors found in the JSON file:</p>
             <ul>${errorList}</ul>
             <div class="back-link">
-              <a href="/simple/${modelNameToRouteComponent(modelName)}/upload-json">Try Again</a>
+              <a href="/simple/${modelNameToRouteComponent(
+                modelName
+              )}/upload-json">Try Again</a>
             </div>
           `
           )

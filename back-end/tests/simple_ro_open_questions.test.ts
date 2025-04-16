@@ -200,6 +200,8 @@ describe("Simple HTML Routes", () => {
       // Create another question to test with multiple
       const question2 = await OpenQuestion.create({
         text: "Another test question?",
+        kind: "ordinal",
+        responses: ["Option 1", "Option 2"],
       });
       const question2Id = question2._id.toString();
 

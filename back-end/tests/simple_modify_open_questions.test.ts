@@ -76,7 +76,11 @@ describe("Simple HTML Modification Routes", () => {
     });
 
     it("should create a new open question via HTML form", async () => {
-      const newQuestion = { text: "A new test open question via HTML form" };
+      const newQuestion = {
+        text: "A new test open question via HTML form",
+        kind: "nominal",
+        responses: JSON.stringify(["Option 1", "Option 2", "Option 3"]),
+      };
 
       // Post the form data
       const response = await request(app)
@@ -231,8 +235,16 @@ describe("Simple HTML Modification Routes", () => {
 
     it("should delete all open questions via HTML form", async () => {
       // Create some additional questions for this test
-      await OpenQuestion.create({ text: "Additional open question 1" });
-      await OpenQuestion.create({ text: "Additional open question 2" });
+      await OpenQuestion.create({
+        text: "Additional question 1",
+        kind: "nominal",
+        responses: ["Option A", "Option B"],
+      });
+      await OpenQuestion.create({
+        text: "Additional question 2",
+        kind: "ordinal",
+        responses: ["Option 1", "Option 2", "Option 3"],
+      });
 
       // Verify we have multiple questions
       const questionsBefore = await OpenQuestion.countDocuments();
@@ -290,10 +302,18 @@ describe("Simple HTML Modification Routes", () => {
       );
 
       if (checkResponse.status === 200) {
-        // Create a small JSON file content for testing
+        // Create a small JSON file content for testing with all required fields
         const fileContent = JSON.stringify([
-          { text: "Uploaded open question 1" },
-          { text: "Uploaded open question 2" },
+          {
+            text: "Uploaded open question 1",
+            kind: "nominal",
+            responses: ["Option 1", "Option 2"],
+          },
+          {
+            text: "Uploaded open question 2",
+            kind: "ordinal",
+            responses: ["Low", "Medium", "High"],
+          },
         ]);
 
         const response = await request(app)
@@ -310,6 +330,13 @@ describe("Simple HTML Modification Routes", () => {
             },
           });
           expect(uploadedQuestions.length).toBeGreaterThan(0);
+
+          // Check that the kind and responses were also saved
+          const question = await OpenQuestion.findOne({
+            text: "Uploaded open question 1",
+          });
+          expect(question?.kind).toBe("nominal");
+          expect(question?.responses).toContain("Option 1");
         }
       }
     });

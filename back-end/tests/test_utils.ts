@@ -9,6 +9,7 @@ import { User } from "../src/schemas/userSchema";
 import { OpenQuestion } from "../src/schemas/openQuestionSchema";
 import { Quote } from "../src/schemas/quoteSchema";
 import { Whence } from "../src/schemas/whenceSchema";
+import { Question } from "../src/schemas/questionSchema";
 
 export interface TestIDs {
   openQuestionId: string;
@@ -74,9 +75,18 @@ export async function teardownTestDB(): Promise<void> {
  * Creates test data for all models and returns their IDs
  */
 export async function createTestData(): Promise<TestIDs> {
+  // Create test question with required fields
+  const question = await Question.create({
+    text: "What is a test question?",
+    kind: "nominal",
+    responses: ["Response A", "Response B"],
+  });
+
   // Create test open question
   const openQuestion = await OpenQuestion.create({
     text: "What is a test question?",
+    kind: "nominal",
+    responses: ["Response 1", "Response 2", "Response 3"],
   });
 
   // Create test user with minimal fields (password is optional in test env)
@@ -104,7 +114,7 @@ export async function createTestData(): Promise<TestIDs> {
   };
 
   // For backward compatibility with existing tests
-  result.questionId = result.openQuestionId;
+  result.questionId = question._id.toString();
 
   return result;
 }
